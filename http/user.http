@@ -3,11 +3,45 @@ POST http://localhost:8080/users
 Content-Type: application/json
 
 {
-  "id": 1,
   "name": "Hyunseok Jeong",
   "email": "hyunseok.jeong@gmail.com"
 }
 
+### Send POST request with json body
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "Hyunseok Jeong 2",
+  "email": "hyunseok.jeong2@gmail.com"
+}
+
+### Send POST request with json body
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "Hyunseok Jeong 3",
+  "email": "hyunseok.jeong3@gmail.com"
+}
+
+### Send POST request with json body
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "Hyunseok Jeong 4",
+  "email": "hyunseok.jeong4@gmail.com"
+}
+
 ### GET user by id
 GET http://localhost:8080/users/1
+Accept: application/json
+
+### GET user by wrong id
+GET http://localhost:8080/users/10000
+Accept: application/json
+
+### GET all users
+GET http://localhost:8080/users
 Accept: application/json
