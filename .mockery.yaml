@@ -1,0 +1,12 @@
+all: true
+with-expecter: true
+resolve-type-alias: false               # ✅ 경고 해결
+issue-845-fix: true                     # ✅ 경고 해결
+
+packages:
+  github.com/nicewook/gocore/internal/domain:
+    config:
+      dir: ./internal/domain/mocks
+      filename: "Mock{{.InterfaceName}}.go"
+      mockname: "{{.InterfaceName}}"
+      outpkg: mocks
