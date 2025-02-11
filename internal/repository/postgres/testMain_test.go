@@ -103,7 +103,8 @@ func setupSchema() {
 // 데이터 초기화 함수
 func cleanDB(t *testing.T, tables ...string) {
 	for _, table := range tables {
-		_, err := testDB.Exec("DELETE FROM " + table)
+		// "DELETE FROM " + table 은 인텔리제이가 에러라고 생각한다.
+		_, err := testDB.Exec("DELETE FROM" + " " + table)
 		assert.NoError(t, err)
 	}
 }
