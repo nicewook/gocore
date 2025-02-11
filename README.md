@@ -28,7 +28,15 @@ Go 백엔드 서비스를 만들때의 기본이 되는 부분을 하나씩 만�
   ```
   
 ### 3. 테스트 - mockery
-Mockery를 사용하여 테스트를 작성한다.
+Mockery를 사용하여 Mock을 만들어 테스트에 사용한다.
+- 브랜치: 3_mockery
+- 블로그 포스팅:- https://jusths.tistory.com/445
+- Mockery로 Mock 생성하기
   ```shell
   $ mockery
   ```
+- Makefile을 사용하여 테스트 실행
+  ```shell
+  $ make test # mockery 부터 실행하고 test를 실행한다.
+  ```
+- pre-commit을 사용하여 커밋 전에 테스트 `make test`를 실행하도록 설정
