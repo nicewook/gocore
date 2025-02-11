@@ -22,7 +22,13 @@ Go 백엔드 서비스를 만들때의 기본이 되는 부분을 하나씩 만�
 - docker compose 사용법
   - 로컬 PC에서 PostgreSQL을 사용하기 위해 docker compose를 사용한다.
   - Docker Desktop이 아닌 OrbStack을 사용하였다([관련 블로그 링크](https://velog.io/@nchime/OrbStack)).
-  ```bash
+  ```shell
   $ docker-compose up -d
   $ docker-compose down
+  ```
+  
+### 3. 테스트 - mockery
+Mockery를 사용하여 테스트를 작성한다.
+  ```shell
+  $ mockery
   ```

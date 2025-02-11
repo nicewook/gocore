@@ -19,6 +19,12 @@ func NewUserHandler(userUseCase domain.UserUseCase) *UserHandler {
 }
 
 func ErrResponse(err error) map[string]string {
+	if err == nil {
+		return map[string]string{
+			"error": "unknown error",
+		}
+	}
+
 	return map[string]string{
 		"error": err.Error(),
 	}
