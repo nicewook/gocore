@@ -1,4 +1,4 @@
-package memory
+package postgres
 
 import (
 	"database/sql"
