@@ -94,6 +94,7 @@ func TestCreateUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
+			// echo context 생성
 			e := echo.New()
 			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(tt.input))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
