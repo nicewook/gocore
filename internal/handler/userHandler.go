@@ -40,9 +40,9 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
-	_, err := h.userUseCase.CreateUser(user)
+	createdUser, err := h.userUseCase.CreateUser(user)
 	if err == nil {
-		return c.JSON(http.StatusCreated, user)
+		return c.JSON(http.StatusCreated, createdUser)
 	}
 
 	switch {

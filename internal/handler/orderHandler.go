@@ -10,25 +10,27 @@ import (
 	"github.com/nicewook/gocore/internal/domain"
 )
 
-type ProductHandler struct {
-	productUseCase domain.ProductUseCase
+type OrderHandler struct {
+	orderUseCase domain.OrderUseCase
 }
 
-func NewProductHandler(productUseCase domain.ProductUseCase) *ProductHandler {
-	return &ProductHandler{productUseCase: productUseCase}
+func NewOrderHandler(orderUseCase domain.OrderUseCase) *OrderHandler {
+	return &OrderHandler{orderUseCase: orderUseCase}
 }
 
-func (h *ProductHandler) CreateProduct(c echo.Context) error {
-	product := new(domain.Product)
-	if err := c.Bind(&product); err != nil {
+func (h *OrderHandler) CreateOrder(c echo.Context) error {
+	var order domain.Order
+	if err := c.Bind(&order); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
-	if product.Name == "" || product.PriceInKRW <= 0 {
+
+	if order.UserID <= 0 || order.ProductID <= 0 || order.Quantity <= 0 || order.TotalPriceInKRW <= 0 {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
-	createdProduct, err := h.productUseCase.CreateProduct(product)
+
+	createdOrder, err := h.orderUseCase.CreateOrder(&order)
 	if err == nil {
-		return c.JSON(http.StatusCreated, createdProduct)
+		return c.JSON(http.StatusCreated, createdOrder)
 	}
 	switch {
 	case errors.Is(err, domain.ErrInvalidInput):
@@ -40,14 +42,16 @@ func (h *ProductHandler) CreateProduct(c echo.Context) error {
 	}
 }
 
-func (h *ProductHandler) GetByID(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+func (h *OrderHandler) GetByID(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
-	product, err := h.productUseCase.GetByID(int64(id))
+
+	order, err := h.orderUseCase.GetByID(int64(id))
 	if err == nil {
-		return c.JSON(http.StatusOK, product)
+		return c.JSON(http.StatusOK, order)
 	}
 	switch {
 	case errors.Is(err, domain.ErrNotFound):
@@ -57,14 +61,15 @@ func (h *ProductHandler) GetByID(c echo.Context) error {
 	}
 }
 
-func (h *ProductHandler) GetAll(c echo.Context) error {
-	products, err := h.productUseCase.GetAll()
+func (h *OrderHandler) GetAll(c echo.Context) error {
+	orders, err := h.orderUseCase.GetAll()
 	if err == nil {
-		return c.JSON(http.StatusOK, products)
+		return c.JSON(http.StatusOK, orders)
 	}
 	switch {
+
 	case errors.Is(err, domain.ErrNotFound):
-		return c.JSON(http.StatusNotFound, ErrResponse(err))
+		return c.JSON(http.StatusNotFound, ErrResponse(domain.ErrNotFound))
 	default:
 		return c.JSON(http.StatusInternalServerError, ErrResponse(domain.ErrInternal))
 	}
