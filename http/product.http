@@ -1,0 +1,47 @@
+### Send POST request with json body
+POST http://localhost:8080/products
+Content-Type: application/json
+
+{
+  "name": "Product 1",
+  "price_in_krw": 1099
+}
+
+### Send POST request with json body
+POST http://localhost:8080/products
+Content-Type: application/json
+
+{
+  "name": "Product 2",
+  "price_in_krw": 2099
+}
+
+### Send POST request with json body
+POST http://localhost:8080/products
+Content-Type: application/json
+
+{
+  "name": "Product 3",
+  "price_in_krw": 3099
+}
+
+### Send POST request with json body
+POST http://localhost:8080/products
+Content-Type: application/json
+
+{
+  "name": "Product 4",
+  "price_in_krw": 4099
+}
+
+### GET product by id
+GET http://localhost:8080/products/1
+Accept: application/json
+
+### GET product by wrong id
+GET http://localhost:8080/products/10000
+Accept: application/json
+
+### GET all products
+GET http://localhost:8080/products
+Accept: application/json

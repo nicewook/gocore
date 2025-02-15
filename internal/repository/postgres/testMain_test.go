@@ -94,6 +94,12 @@ func setupSchema() {
             name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE
         );
+        CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL,
+            price_in_krw BIGINT NOT NULL,
+            UNIQUE (name)
+        );
     `
 	if _, err := testDB.Exec(schema); err != nil {
 		log.Fatalf("테이블 생성 실패: %v", err)

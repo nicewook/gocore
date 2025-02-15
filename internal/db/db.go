@@ -38,6 +38,10 @@ func NewDBConnection(cfg *config.Config) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to create users table: %w", err)
 	}
 
+	if err := createProductTable(db); err != nil {
+		return nil, fmt.Errorf("failed to create products table: %w", err)
+	}
+
 	return db, nil
 }
 
@@ -53,6 +57,21 @@ func createUserTable(db *sql.DB) error {
 
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("failed to create users table: %w", err)
+	}
+	return nil
+}
+
+func createProductTable(db *sql.DB) error {
+	const query = `
+		CREATE TABLE IF NOT EXISTS products (
+			id SERIAL PRIMARY KEY,
+			name VARCHAR(255) NOT NULL,
+            price_in_krw BIGINT NOT NULL,
+			UNIQUE (name)
+		)
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("failed to create products table: %w", err)
 	}
 	return nil
 }
