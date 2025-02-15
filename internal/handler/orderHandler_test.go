@@ -52,7 +52,7 @@ func TestCreateOrder(t *testing.T) {
 
 			mockUseCase := new(mocks.OrderUseCase)
 			mockUseCase.On("CreateOrder", tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
-			handler := NewOrderHandler(mockUseCase)
+			handler := NewOrderHandler(e, mockUseCase)
 
 			err := handler.CreateOrder(c)
 			assert.NoError(t, err)
@@ -108,7 +108,7 @@ func TestGetOrderByID(t *testing.T) {
 
 			mockUseCase := new(mocks.OrderUseCase)
 			mockUseCase.On("GetByID", mock.Anything).Return(tt.mockReturn, tt.mockError).Maybe()
-			handler := NewOrderHandler(mockUseCase)
+			handler := NewOrderHandler(e, mockUseCase)
 
 			err := handler.GetByID(c)
 			assert.NoError(t, err)
@@ -158,7 +158,7 @@ func TestGetAllOrders(t *testing.T) {
 			c := e.NewContext(req, rec)
 			mockUseCase := new(mocks.OrderUseCase)
 			mockUseCase.On("GetAll").Return(tt.mockReturn, tt.mockError)
-			handler := NewOrderHandler(mockUseCase)
+			handler := NewOrderHandler(e, mockUseCase)
 			err := handler.GetAll(c)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedStatus, rec.Code)

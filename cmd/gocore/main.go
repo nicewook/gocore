@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-
 	env := flag.String("env", "dev", "Environment (dev, qa, stg, prod)")
 	flag.Parse()
 
@@ -31,39 +30,27 @@ func main() {
 
 	fmt.Printf("config: %+v\n", cfg)
 
-	// 여기에 DB 연결 및 애플리케이션 로직 추가
+	// DB 연결 및 애플리케이션 로직 추가
 	dbConn, err := db.NewDBConnection(cfg)
 	if err != nil {
 		log.Fatalf("DB connection error: %v", err)
 	}
 
-	// 의존성 주입
-	userRepo := repository.NewUserRepository(dbConn)
-	userUseCase := usecase.NewUserUseCase(userRepo)
-	userHandler := handler.NewUserHandler(userUseCase)
-
-	productRepo := repository.NewProductRepository(dbConn)
-	productUseCase := usecase.NewProductUseCase(productRepo)
-	productHandler := handler.NewProductHandler(productUseCase)
-
-	orderRepo := repository.NewOrderRepository(dbConn)
-	orderUseCase := usecase.NewOrderUseCase(orderRepo)
-	orderHandler := handler.NewOrderHandler(orderUseCase)
-
 	// 라우팅
 	e := echo.New()
 
-	e.POST("/users", userHandler.CreateUser)
-	e.GET("/users/:id", userHandler.GetByID)
-	e.GET("/users", userHandler.GetAll)
+	// 의존성 주입 및 핸들러 생성
+	userRepo := repository.NewUserRepository(dbConn)
+	userUseCase := usecase.NewUserUseCase(userRepo)
+	handler.NewUserHandler(e, userUseCase)
 
-	e.POST("/products", productHandler.CreateProduct)
-	e.GET("/products/:id", productHandler.GetByID)
-	e.GET("/products", productHandler.GetAll)
+	productRepo := repository.NewProductRepository(dbConn)
+	productUseCase := usecase.NewProductUseCase(productRepo)
+	handler.NewProductHandler(e, productUseCase)
 
-	e.POST("/orders", orderHandler.CreateOrder)
-	e.GET("/orders/:id", orderHandler.GetByID)
-	e.GET("/orders", orderHandler.GetAll)
+	orderRepo := repository.NewOrderRepository(dbConn)
+	orderUseCase := usecase.NewOrderUseCase(orderRepo)
+	handler.NewOrderHandler(e, orderUseCase)
 
 	// 서버 실행
 	log.Println("Server started at :8080")

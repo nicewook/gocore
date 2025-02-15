@@ -104,7 +104,7 @@ func TestCreateUser(t *testing.T) {
 			// mock 생성, 설정및 핸들러 생성
 			mockUseCase := new(mocks.UserUseCase)
 			mockUseCase.On("CreateUser", tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
-			handler := NewUserHandler(mockUseCase)
+			handler := NewUserHandler(e, mockUseCase)
 
 			// 핸들러 실행 및 검증
 			err := handler.CreateUser(c)
@@ -166,7 +166,7 @@ func TestGetByID(t *testing.T) {
 			// mcok 생성, 설정 및 핸들러 생성
 			mockUseCase := new(mocks.UserUseCase)
 			mockUseCase.On("GetByID", mock.Anything).Return(tt.mockReturn, tt.mockError).Maybe()
-			handler := NewUserHandler(mockUseCase)
+			handler := NewUserHandler(e, mockUseCase)
 
 			// 핸들러 실행 및 검증
 			err := handler.GetByID(c)
@@ -219,7 +219,7 @@ func TestGetAll(t *testing.T) {
 			// mock 생성, 설정 및 핸들러 생성
 			mockUseCase := new(mocks.UserUseCase)
 			mockUseCase.On("GetAll").Return(tt.mockReturn, tt.mockError)
-			handler := NewUserHandler(mockUseCase)
+			handler := NewUserHandler(e, mockUseCase)
 
 			// 핸들러 실행 및 검증
 			err := handler.GetAll(c)

@@ -14,8 +14,15 @@ type OrderHandler struct {
 	orderUseCase domain.OrderUseCase
 }
 
-func NewOrderHandler(orderUseCase domain.OrderUseCase) *OrderHandler {
-	return &OrderHandler{orderUseCase: orderUseCase}
+func NewOrderHandler(e *echo.Echo, orderUseCase domain.OrderUseCase) *OrderHandler {
+	handler := &OrderHandler{orderUseCase: orderUseCase}
+
+	group := e.Group("/orders")
+	group.POST("", handler.CreateOrder)
+	group.GET("", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+
+	return handler
 }
 
 func (h *OrderHandler) CreateOrder(c echo.Context) error {

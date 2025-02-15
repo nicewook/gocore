@@ -14,8 +14,15 @@ type ProductHandler struct {
 	productUseCase domain.ProductUseCase
 }
 
-func NewProductHandler(productUseCase domain.ProductUseCase) *ProductHandler {
-	return &ProductHandler{productUseCase: productUseCase}
+func NewProductHandler(e *echo.Echo, productUseCase domain.ProductUseCase) *ProductHandler {
+	handler := &ProductHandler{productUseCase: productUseCase}
+
+	group := e.Group("/products")
+	group.POST("", handler.CreateProduct)
+	group.GET("", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+
+	return handler
 }
 
 func (h *ProductHandler) CreateProduct(c echo.Context) error {

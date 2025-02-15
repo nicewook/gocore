@@ -14,8 +14,15 @@ type UserHandler struct {
 	userUseCase domain.UserUseCase
 }
 
-func NewUserHandler(userUseCase domain.UserUseCase) *UserHandler {
-	return &UserHandler{userUseCase: userUseCase}
+func NewUserHandler(e *echo.Echo, userUseCase domain.UserUseCase) *UserHandler {
+	handler := &UserHandler{userUseCase: userUseCase}
+
+	group := e.Group("/users")
+	group.POST("", handler.CreateUser)
+	group.GET("", handler.GetAll)
+	group.GET("/:id", handler.GetByID)
+
+	return handler
 }
 
 func ErrResponse(err error) map[string]string {
