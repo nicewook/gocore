@@ -42,6 +42,10 @@ func NewDBConnection(cfg *config.Config) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to create products table: %w", err)
 	}
 
+	if err := createOrderTable(db); err != nil {
+		return nil, fmt.Errorf("failed to create orders table: %w", err)
+	}
+
 	return db, nil
 }
 
@@ -72,6 +76,25 @@ func createProductTable(db *sql.DB) error {
 	`
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("failed to create products table: %w", err)
+	}
+	return nil
+}
+
+func createOrderTable(db *sql.DB) error {
+	const query = `
+		CREATE TABLE IF NOT EXISTS orders (
+			id SERIAL PRIMARY KEY,
+			user_id INT NOT NULL,
+			product_id INT NOT NULL,
+			quantity INT NOT NULL,
+		    total_price_in_krw BIGINT NOT NULL,
+			created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (product_id) REFERENCES products(id)
+		)
+	`
+	if _, err := db.Exec(query); err != nil {
+		return fmt.Errorf("failed to create orders table: %w", err)
 	}
 	return nil
 }
