@@ -41,3 +41,8 @@ Mockery를 사용하여 Mock을 만들어 테스트에 사용한다.
   ```
 - pre-commit을 사용하여 커밋 전에 테스트 `make test`를 실행하도록 설정
   - test를 실행하고 성공하면 커밋을 진행한다.
+
+### 4. 의존성 주입
+[fx](https://github.com/uber-go/fx) 라이브러리를 사용하여 의존성 주입을 구현한다.
+- 브랜치: 4_fx-begin, 4_fx-end
+- 블로그 포스팅:- https://jusths.tistory.com/446
