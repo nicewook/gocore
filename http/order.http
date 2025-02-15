@@ -1,0 +1,55 @@
+### Send POST request with json body
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "product_id": 1,
+  "quantity": 1,
+  "total_price_in_krw": 1000
+}
+
+### Send POST request with json body
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "user_id": 2,
+  "product_id": 3,
+  "quantity": 2,
+  "total_price_in_krw": 2000
+}
+
+### Send POST request with json body
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "user_id": 3,
+  "product_id": 3,
+  "quantity": 3,
+  "total_price_in_krw": 3000
+}
+
+### Send POST request with json body
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{
+  "user_id": 4,
+  "product_id": 4,
+  "quantity": 4,
+  "total_price_in_krw": 4000
+}
+
+### GET order by id
+GET http://localhost:8080/orders/1
+Accept: application/json
+
+### GET order by wrong id
+GET http://localhost:8080/orders/10000
+Accept: application/json
+
+### GET all orders
+GET http://localhost:8080/orders
+Accept: application/json

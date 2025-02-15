@@ -46,6 +46,10 @@ func main() {
 	productUseCase := usecase.NewProductUseCase(productRepo)
 	productHandler := handler.NewProductHandler(productUseCase)
 
+	orderRepo := repository.NewOrderRepository(dbConn)
+	orderUseCase := usecase.NewOrderUseCase(orderRepo)
+	orderHandler := handler.NewOrderHandler(orderUseCase)
+
 	// 라우팅
 	e := echo.New()
 
@@ -56,6 +60,10 @@ func main() {
 	e.POST("/products", productHandler.CreateProduct)
 	e.GET("/products/:id", productHandler.GetByID)
 	e.GET("/products", productHandler.GetAll)
+
+	e.POST("/orders", orderHandler.CreateOrder)
+	e.GET("/orders/:id", orderHandler.GetByID)
+	e.GET("/orders", orderHandler.GetAll)
 
 	// 서버 실행
 	log.Println("Server started at :8080")
