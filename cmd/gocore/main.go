@@ -13,12 +13,12 @@ import (
 	"github.com/nicewook/gocore/internal/config"
 	"github.com/nicewook/gocore/internal/db"
 	"github.com/nicewook/gocore/internal/handler"
+	"github.com/nicewook/gocore/internal/middlewares"
 	repository "github.com/nicewook/gocore/internal/repository/postgres"
 	"github.com/nicewook/gocore/internal/usecase"
 )
 
 func main() {
-
 	app := fx.New(
 		fx.Provide(
 			NewConfig,
@@ -36,6 +36,7 @@ func main() {
 			usecase.NewOrderUseCase,
 		),
 		fx.Invoke(
+			middlewares.RegisterMiddlewares,
 			handler.NewUserHandler,
 			handler.NewProductHandler,
 			handler.NewOrderHandler,
