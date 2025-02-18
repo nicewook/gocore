@@ -10,3 +10,9 @@ db:
   password: "dev_password"
   dbname: "dev_db"
   sslmode: "disable"
+
+secure:
+  cors_allow_origins:
+    - "http://your.frontend.com"
+    - "http://localhost:3000"
+  jwt_secret: "your_jwt_secret"

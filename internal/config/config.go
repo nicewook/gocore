@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	App AppConfig `yaml:"app"`
-	DB  DBConfig  `yaml:"db"`
+	App    AppConfig    `yaml:"app"`
+	DB     DBConfig     `yaml:"db"`
+	Secure SecureConfig `yaml:"secure"`
 }
 
 type AppConfig struct {
@@ -24,6 +25,11 @@ type DBConfig struct {
 	Password string `yaml:"password"`
 	DBName   string `yaml:"dbname"`
 	SSLMode  string `yaml:"sslmode"` // sslmode는 disable, require, verify-ca, verify-full 를 설정 가능
+}
+
+type SecureConfig struct {
+	CORSAllowOrigins []string `yaml:"cors_allow_origins"`
+	JWTSecret        string   `yaml:"jwt_secret"`
 }
 
 func LoadConfig(env string) (*Config, error) {

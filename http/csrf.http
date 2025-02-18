@@ -1,0 +1,30 @@
+### CSRF 토큰 받기
+GET http://localhost:8080/csrf-token
+
+> {%
+    client.global.set("csrf_token", response.body.csrf_token);
+%}
+
+### POST 요청 테스트 - csrf_token이 필요하다.
+POST http://localhost:8080/users
+Content-Type: application/json
+X-CSRF-Token: {{csrf_token}}
+
+{
+  "name": "Hyunseok Jeong 4",
+  "email": "hyunseok.jeong4@gmail.com"
+}
+
+### POST 요청 테스트 - csrf_token이 없으면 에러가 난다.
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "name": "Hyunseok Jeong 4",
+  "email": "hyunseok.jeong4@gmail.com"
+}
+
+### GET 요청 테스트 - csrf_token이 필요없다.
+GET http://localhost:8080/users
+Accept: application/json
+
