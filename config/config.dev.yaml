@@ -2,6 +2,7 @@ app:
   env: "dev"
   port: 8080
   debug: false
+  log_level: "debug"
 
 db:
   host: "localhost"
@@ -15,4 +16,4 @@ secure:
   cors_allow_origins:
     - "http://your.frontend.com"
     - "http://localhost:3000"
-  jwt_secret: "your_jwt_secret"
+    - "http://localhost"

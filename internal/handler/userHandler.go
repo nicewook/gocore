@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/nicewook/gocore/internal/domain"
+	"github.com/nicewook/gocore/pkg/contextutil"
 )
 
 type UserHandler struct {
@@ -81,6 +82,8 @@ func (h *UserHandler) GetByID(c echo.Context) error {
 }
 
 func (h *UserHandler) GetAll(c echo.Context) error {
+	logger := contextutil.GetLogger(c.Request().Context())
+	logger.Info("UserHandler:GetAll")
 
 	users, err := h.userUseCase.GetAll()
 	if err == nil {

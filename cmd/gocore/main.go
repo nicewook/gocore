@@ -6,6 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"go.uber.org/fx"
@@ -22,6 +26,7 @@ func main() {
 	app := fx.New(
 		fx.Provide(
 			NewConfig,
+			NewLogger,
 			NewDB,
 			echo.New,
 		),
@@ -61,8 +66,38 @@ func NewConfig() *config.Config {
 		log.Fatalf("Config load error: %v", err)
 	}
 
-	fmt.Printf("config: %+v\n", cfg)
 	return cfg
+}
+
+func NewLogger(cfg *config.Config) *slog.Logger {
+	// 로그 레벨 설정
+	logLevel := slog.LevelInfo
+	switch strings.ToLower(cfg.App.LogLevel) {
+	case "debug":
+		logLevel = slog.LevelDebug
+	case "info":
+		logLevel = slog.LevelInfo
+	case "warn":
+		logLevel = slog.LevelWarn
+	case "error":
+		logLevel = slog.LevelError
+	default:
+		logLevel = slog.LevelInfo
+	}
+
+	logHandler := slog.NewJSONHandler(
+		os.Stdout,
+		&slog.HandlerOptions{
+			Level: logLevel,
+			ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+				if a.Key == slog.TimeKey {
+					return slog.String(a.Key, time.Now().Format("2006-01-02T15:04:05.000Z07:00"))
+				}
+				return a
+			},
+		},
+	)
+	return slog.New(logHandler)
 }
 
 func NewDB(lc fx.Lifecycle, cfg *config.Config) *sql.DB {

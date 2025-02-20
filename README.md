@@ -51,3 +51,8 @@ Mockery를 사용하여 Mock을 만들어 테스트에 사용한다.
 다양한 미들웨어를 적용해본다.
 - 브랜치: 5_middleware
 - 블로그 포스팅:- https://jusths.tistory.com/447
+
+### 6. 로깅
+RequestID, Logging 미들웨어를 고도화하여 요청에 대한 로깅을 강화한다. 
+- 브랜치: 6_logging
+- 블로그 포스팅:- https://jusths.tistory.com/448

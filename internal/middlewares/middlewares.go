@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -12,9 +13,10 @@ import (
 	"golang.org/x/time/rate"
 
 	"github.com/nicewook/gocore/internal/config"
+	"github.com/nicewook/gocore/pkg/contextutil"
 )
 
-func RegisterMiddlewares(cfg *config.Config, e *echo.Echo) {
+func RegisterMiddlewares(cfg *config.Config, logger *slog.Logger, e *echo.Echo) {
 
 	// ✅ Trailing Slash 제거 및 301 리디렉트 설정
 	e.Pre(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
@@ -22,12 +24,21 @@ func RegisterMiddlewares(cfg *config.Config, e *echo.Echo) {
 	}))
 
 	// ✅ RequestID: 각 요청에 고유한 ID 부여 (추적 및 디버깅 목적)
-	e.Use(middleware.RequestID())
+	e.Use(middleware.RequestIDWithConfig(middleware.RequestIDConfig{
+		RequestIDHandler: func(c echo.Context, requestID string) {
+			// RequestID를 request header 및 context 에 추가하기
+			// 이렇게 하면 다른 미들웨어나 handler, usecase, repository 등에서 RequestID를 가져다 쓸 수 있다
+			req := c.Request()
+			req.Header.Set(echo.HeaderXRequestID, requestID) // 요청 헤더에 추가
 
-	// ✅ Logger: 요청 및 응답 로깅 설정
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `[${time_rfc3339}] ${method} ${uri} ${status} request_id=${id}\n`,
+			ctx := contextutil.WithRequestID(req.Context(), requestID)
+			c.SetRequest(req.WithContext(ctx))
+		},
 	}))
+
+	// ✅ Logger: 커스텀 로거 사용
+	// echo 에서 제공하는 RequestID, Logger 미들웨어를 사용하지 않고 직접 구현한 LoggerMiddleware 사용
+	e.Use(LoggerMiddleware(logger))
 
 	// ✅ Recover: 패닉 발생 시 복구 및 로그 출력
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{

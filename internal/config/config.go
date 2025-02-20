@@ -7,29 +7,29 @@ import (
 )
 
 type Config struct {
-	App    AppConfig    `yaml:"app"`
-	DB     DBConfig     `yaml:"db"`
-	Secure SecureConfig `yaml:"secure"`
+	App    AppConfig    `mapstructure:"app"`
+	DB     DBConfig     `mapstructure:"db"`
+	Secure SecureConfig `mapstructure:"secure"`
 }
 
 type AppConfig struct {
-	Env   string `yaml:"env"`
-	Port  int    `yaml:"port"`
-	Debug bool   `yaml:"debug"`
+	Env      string `mapstructure:"env"`
+	Port     int    `mapstructure:"port"`
+	Debug    bool   `mapstructure:"debug"`
+	LogLevel string `mapstructure:"log_level"`
 }
 
 type DBConfig struct {
-	Host     string `yaml:"host"`
-	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	DBName   string `yaml:"dbname"`
-	SSLMode  string `yaml:"sslmode"` // sslmode는 disable, require, verify-ca, verify-full 를 설정 가능
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	User     string `mapstructure:"user"`
+	Password string `mapstructure:"password"`
+	DBName   string `mapstructure:"dbname"`
+	SSLMode  string `mapstructure:"sslmode"` // sslmode는 disable, require, verify-ca, verify-full 를 설정 가능
 }
 
 type SecureConfig struct {
-	CORSAllowOrigins []string `yaml:"cors_allow_origins"`
-	JWTSecret        string   `yaml:"jwt_secret"`
+	CORSAllowOrigins []string `mapstructure:"cors_allow_origins"`
 }
 
 func LoadConfig(env string) (*Config, error) {
