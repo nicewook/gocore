@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/lib/pq"
+
 	"github.com/nicewook/gocore/internal/config"
+	"github.com/nicewook/gocore/internal/domain"
+	"github.com/nicewook/gocore/pkg/security"
 )
 
 func NewDBConnection(cfg *config.Config) (*sql.DB, error) {
@@ -55,13 +59,21 @@ func createUserTable(db *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS users (
 			id SERIAL PRIMARY KEY,
 			name VARCHAR(255) NOT NULL,
-			email VARCHAR(255) NOT NULL UNIQUE
+			email VARCHAR(255) NOT NULL UNIQUE,
+			password VARCHAR(255) NOT NULL,
+			roles VARCHAR(255) DEFAULT 'User'
 		)
 	`
 
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("failed to create users table: %w", err)
 	}
+
+	// 관리자 계정 생성 (테이블 존재 여부와 관계없이 실행)
+	if err := createAdminUser(db); err != nil {
+		return fmt.Errorf("failed to create admin user: %w", err)
+	}
+
 	return nil
 }
 
@@ -96,5 +108,48 @@ func createOrderTable(db *sql.DB) error {
 	if _, err := db.Exec(query); err != nil {
 		return fmt.Errorf("failed to create orders table: %w", err)
 	}
+	return nil
+}
+
+// 관리자 계정 생성 함수
+func createAdminUser(db *sql.DB) error {
+
+	adminUser := domain.User{
+		Name:     "Admin",
+		Email:    "admin@gmail.com",
+		Password: "adminpassword",
+		Roles:    []string{domain.RoleAdmin},
+	}
+
+	// 관리자 계정이 이미 존재하는지 확인
+	var count int
+	err := db.QueryRow(
+		"SELECT COUNT(*) FROM users WHERE email = $1",
+		adminUser.Email).
+		Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check if admin user exists: %w", err)
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	// 관리자 비밀번호 해싱
+	hashedPassword, err := security.GeneratePasswordHash(adminUser.Password, nil)
+	if err != nil {
+		return fmt.Errorf("failed to hash admin password: %w", err)
+	}
+	adminUser.Password = hashedPassword
+
+	// 관리자 계정 생성
+	_, err = db.Exec(
+		"INSERT INTO users (name, email, password, roles) VALUES ($1, $2, $3, $4)",
+		adminUser.Name, adminUser.Email, adminUser.Password, adminUser.RolesToString(),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create admin user: %w", err)
+	}
+
 	return nil
 }

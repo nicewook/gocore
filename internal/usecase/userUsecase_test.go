@@ -1,62 +1,15 @@
 package usecase
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/nicewook/gocore/internal/domain"
 	"github.com/nicewook/gocore/internal/domain/mocks"
 )
-
-func TestCreateUser(t *testing.T) {
-	tests := []struct {
-		name       string
-		mockInput  *domain.User
-		mockReturn *domain.User
-		mockError  error
-		expected   *domain.User
-		expectErr  error
-	}{
-		{
-			name:       "Success",
-			mockInput:  &domain.User{Name: "John", Email: "john@example.com"},
-			mockReturn: &domain.User{Name: "John", Email: "john@example.com"},
-			mockError:  nil,
-			expected:   &domain.User{Name: "John", Email: "john@example.com"},
-			expectErr:  nil,
-		},
-		{
-			name:      "InvalidInput",
-			mockInput: &domain.User{Name: "", Email: ""},
-			mockError: domain.ErrInvalidInput,
-			expected:  nil,
-			expectErr: domain.ErrInvalidInput,
-		},
-		{
-			name:      "AlreadyExists",
-			mockInput: &domain.User{Name: "John", Email: "john@example.com"},
-			mockError: domain.ErrAlreadyExists,
-			expected:  nil,
-			expectErr: domain.ErrAlreadyExists,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			mockRepo := new(mocks.UserRepository)
-			mockRepo.On("Save", tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
-
-			uc := NewUserUseCase(mockRepo)
-			result, err := uc.CreateUser(tt.mockInput)
-
-			assert.Equal(t, tt.expected, result)
-			assert.Equal(t, tt.expectErr, err)
-
-			mockRepo.AssertExpectations(t)
-		})
-	}
-}
 
 func TestGetByID(t *testing.T) {
 	tests := []struct {
@@ -76,21 +29,23 @@ func TestGetByID(t *testing.T) {
 			expectErr:  nil,
 		},
 		{
-			name:      "User Not Found",
-			inputID:   2,
-			mockError: domain.ErrNotFound,
-			expected:  nil,
-			expectErr: domain.ErrNotFound,
+			name:       "User Not Found",
+			inputID:    2,
+			mockReturn: nil,
+			mockError:  domain.ErrNotFound,
+			expected:   nil,
+			expectErr:  domain.ErrNotFound,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.UserRepository)
-			mockRepo.On("GetByID", tt.inputID).Return(tt.mockReturn, tt.mockError)
+			mockRepo.On("GetByID", mock.Anything, tt.inputID).Return(tt.mockReturn, tt.mockError)
 
 			uc := NewUserUseCase(mockRepo)
-			result, err := uc.GetByID(tt.inputID)
+			ctx := context.Background()
+			result, err := uc.GetByID(ctx, tt.inputID)
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)
@@ -132,10 +87,11 @@ func TestGetAll(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.UserRepository)
-			mockRepo.On("GetAll").Return(tt.mockReturn, tt.mockError)
+			mockRepo.On("GetAll", mock.Anything).Return(tt.mockReturn, tt.mockError)
 
 			uc := NewUserUseCase(mockRepo)
-			result, err := uc.GetAll()
+			ctx := context.Background()
+			result, err := uc.GetAll(ctx)
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)

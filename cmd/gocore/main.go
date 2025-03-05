@@ -31,17 +31,20 @@ func main() {
 			echo.New,
 		),
 		fx.Provide(
+			repository.NewAuthRepository,
 			repository.NewUserRepository,
 			repository.NewProductRepository,
 			repository.NewOrderRepository,
 		),
 		fx.Provide(
+			usecase.NewAuthUseCase,
 			usecase.NewUserUseCase,
 			usecase.NewProductUseCase,
 			usecase.NewOrderUseCase,
 		),
 		fx.Invoke(
 			middlewares.RegisterMiddlewares,
+			handler.NewAuthHandler,
 			handler.NewUserHandler,
 			handler.NewProductHandler,
 			handler.NewOrderHandler,

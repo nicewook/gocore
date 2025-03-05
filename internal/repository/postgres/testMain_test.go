@@ -90,26 +90,28 @@ func setupPostgresContainer(ctx context.Context) (testcontainers.Container, *sql
 func setupSchema() {
 	const schema = `
         CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE
-        );
+			id SERIAL PRIMARY KEY,
+			name VARCHAR(255) NOT NULL,
+			email VARCHAR(255) NOT NULL UNIQUE,
+			password VARCHAR(255) NOT NULL,
+			roles VARCHAR(255) DEFAULT 'User'
+		);
         CREATE TABLE IF NOT EXISTS products (
-            id SERIAL PRIMARY KEY,
-            name TEXT NOT NULL,
+			id SERIAL PRIMARY KEY,
+			name VARCHAR(255) NOT NULL,
             price_in_krw BIGINT NOT NULL,
-            UNIQUE (name)
-        );
+			UNIQUE (name)
+		);
         CREATE TABLE IF NOT EXISTS orders (
-            id SERIAL PRIMARY KEY,
-            user_id INT NOT NULL,
-            product_id INT NOT NULL,
-            quantity INT NOT NULL,
-            total_price_in_krw BIGINT NOT NULL,
-            created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-            FOREIGN KEY (user_id) REFERENCES users(id),
-            FOREIGN KEY (product_id) REFERENCES products(id)
-        );
+			id SERIAL PRIMARY KEY,
+			user_id INT NOT NULL,
+			product_id INT NOT NULL,
+			quantity INT NOT NULL,
+		    total_price_in_krw BIGINT NOT NULL,
+			created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (product_id) REFERENCES products(id)
+		);
     `
 	if _, err := testDB.Exec(schema); err != nil {
 		log.Fatalf("테이블 생성 실패: %v", err)

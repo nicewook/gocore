@@ -23,14 +23,16 @@ func TestCreateProduct(t *testing.T) {
 		mockReturn     interface{}
 		mockError      error
 		expectedStatus int
+		expectedBody   string
 	}{
 		{
 			name:           "Success",
 			input:          `{"name":"Product1","price_in_krw":100}`,
 			mockInput:      &domain.Product{Name: "Product1", PriceInKRW: 100},
-			mockReturn:     &domain.Product{Name: "Product1", PriceInKRW: 100},
+			mockReturn:     &domain.Product{ID: 1, Name: "Product1", PriceInKRW: 100},
 			mockError:      nil,
 			expectedStatus: http.StatusCreated,
+			expectedBody:   `{"id":1,"name":"Product1","price_in_krw":100}`,
 		},
 		{
 			name:           "InvalidInput",
@@ -39,6 +41,16 @@ func TestCreateProduct(t *testing.T) {
 			mockReturn:     nil,
 			mockError:      nil,
 			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"invalid input"}`,
+		},
+		{
+			name:           "InvalidJSON",
+			input:          `{"name":"Product1",price_in_krw:100}`,
+			mockInput:      nil,
+			mockReturn:     nil,
+			mockError:      nil,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"invalid input"}`,
 		},
 		{
 			name:           "AlreadyExists",
@@ -47,6 +59,25 @@ func TestCreateProduct(t *testing.T) {
 			mockReturn:     nil,
 			mockError:      domain.ErrAlreadyExists,
 			expectedStatus: http.StatusConflict,
+			expectedBody:   `{"error":"already exists"}`,
+		},
+		{
+			name:           "InternalError",
+			input:          `{"name":"Product1","price_in_krw":100}`,
+			mockInput:      &domain.Product{Name: "Product1", PriceInKRW: 100},
+			mockReturn:     nil,
+			mockError:      domain.ErrInternal,
+			expectedStatus: http.StatusInternalServerError,
+			expectedBody:   `{"error":"internal error"}`,
+		},
+		{
+			name:           "InvalidInputFromUseCase",
+			input:          `{"name":"Product1","price_in_krw":100}`,
+			mockInput:      &domain.Product{Name: "Product1", PriceInKRW: 100},
+			mockReturn:     nil,
+			mockError:      domain.ErrInvalidInput,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"invalid input"}`,
 		},
 	}
 	for _, tt := range tests {
@@ -57,11 +88,19 @@ func TestCreateProduct(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			mockUseCase := new(mocks.ProductUseCase)
-			mockUseCase.On("CreateProduct", tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
+			if tt.mockInput != nil {
+				mockUseCase.On("CreateProduct", mock.Anything, tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
+			}
 			handler := NewProductHandler(e, mockUseCase)
 			err := handler.CreateProduct(c)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedStatus, rec.Code)
+
+			// 응답 본문 검증
+			if tt.expectedBody != "" {
+				assert.JSONEq(t, tt.expectedBody, rec.Body.String())
+			}
+
 			mockUseCase.AssertExpectations(t)
 		})
 	}
@@ -110,7 +149,7 @@ func TestGetProductByID(t *testing.T) {
 			c.SetParamNames("id")
 			c.SetParamValues(tt.pathParam)
 			mockUseCase := new(mocks.ProductUseCase)
-			mockUseCase.On("GetByID", mock.Anything).Return(tt.mockReturn, tt.mockError).Maybe()
+			mockUseCase.On("GetByID", mock.Anything, mock.Anything).Return(tt.mockReturn, tt.mockError).Maybe()
 			handler := NewProductHandler(e, mockUseCase)
 			err := handler.GetByID(c)
 			assert.NoError(t, err)
@@ -154,7 +193,7 @@ func TestGetAllProducts(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			mockUseCase := new(mocks.ProductUseCase)
-			mockUseCase.On("GetAll").Return(tt.mockReturn, tt.mockError)
+			mockUseCase.On("GetAll", mock.Anything).Return(tt.mockReturn, tt.mockError)
 			handler := NewProductHandler(e, mockUseCase)
 			err := handler.GetAll(c)
 			assert.NoError(t, err)

@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/nicewook/gocore/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -20,9 +22,9 @@ func (_m *OrderUseCase) EXPECT() *OrderUseCase_Expecter {
 	return &OrderUseCase_Expecter{mock: &_m.Mock}
 }
 
-// CreateOrder provides a mock function with given fields: order
-func (_m *OrderUseCase) CreateOrder(order *domain.Order) (*domain.Order, error) {
-	ret := _m.Called(order)
+// CreateOrder provides a mock function with given fields: ctx, order
+func (_m *OrderUseCase) CreateOrder(ctx context.Context, order *domain.Order) (*domain.Order, error) {
+	ret := _m.Called(ctx, order)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateOrder")
@@ -30,19 +32,19 @@ func (_m *OrderUseCase) CreateOrder(order *domain.Order) (*domain.Order, error) 
 
 	var r0 *domain.Order
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*domain.Order) (*domain.Order, error)); ok {
-		return rf(order)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Order) (*domain.Order, error)); ok {
+		return rf(ctx, order)
 	}
-	if rf, ok := ret.Get(0).(func(*domain.Order) *domain.Order); ok {
-		r0 = rf(order)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Order) *domain.Order); ok {
+		r0 = rf(ctx, order)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.Order)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*domain.Order) error); ok {
-		r1 = rf(order)
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.Order) error); ok {
+		r1 = rf(ctx, order)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -56,14 +58,15 @@ type OrderUseCase_CreateOrder_Call struct {
 }
 
 // CreateOrder is a helper method to define mock.On call
+//   - ctx context.Context
 //   - order *domain.Order
-func (_e *OrderUseCase_Expecter) CreateOrder(order interface{}) *OrderUseCase_CreateOrder_Call {
-	return &OrderUseCase_CreateOrder_Call{Call: _e.mock.On("CreateOrder", order)}
+func (_e *OrderUseCase_Expecter) CreateOrder(ctx interface{}, order interface{}) *OrderUseCase_CreateOrder_Call {
+	return &OrderUseCase_CreateOrder_Call{Call: _e.mock.On("CreateOrder", ctx, order)}
 }
 
-func (_c *OrderUseCase_CreateOrder_Call) Run(run func(order *domain.Order)) *OrderUseCase_CreateOrder_Call {
+func (_c *OrderUseCase_CreateOrder_Call) Run(run func(ctx context.Context, order *domain.Order)) *OrderUseCase_CreateOrder_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*domain.Order))
+		run(args[0].(context.Context), args[1].(*domain.Order))
 	})
 	return _c
 }
@@ -73,14 +76,14 @@ func (_c *OrderUseCase_CreateOrder_Call) Return(_a0 *domain.Order, _a1 error) *O
 	return _c
 }
 
-func (_c *OrderUseCase_CreateOrder_Call) RunAndReturn(run func(*domain.Order) (*domain.Order, error)) *OrderUseCase_CreateOrder_Call {
+func (_c *OrderUseCase_CreateOrder_Call) RunAndReturn(run func(context.Context, *domain.Order) (*domain.Order, error)) *OrderUseCase_CreateOrder_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetAll provides a mock function with no fields
-func (_m *OrderUseCase) GetAll() ([]domain.Order, error) {
-	ret := _m.Called()
+// GetAll provides a mock function with given fields: ctx
+func (_m *OrderUseCase) GetAll(ctx context.Context) ([]domain.Order, error) {
+	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
@@ -88,19 +91,19 @@ func (_m *OrderUseCase) GetAll() ([]domain.Order, error) {
 
 	var r0 []domain.Order
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]domain.Order, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(context.Context) ([]domain.Order, error)); ok {
+		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func() []domain.Order); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(context.Context) []domain.Order); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.Order)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -114,13 +117,14 @@ type OrderUseCase_GetAll_Call struct {
 }
 
 // GetAll is a helper method to define mock.On call
-func (_e *OrderUseCase_Expecter) GetAll() *OrderUseCase_GetAll_Call {
-	return &OrderUseCase_GetAll_Call{Call: _e.mock.On("GetAll")}
+//   - ctx context.Context
+func (_e *OrderUseCase_Expecter) GetAll(ctx interface{}) *OrderUseCase_GetAll_Call {
+	return &OrderUseCase_GetAll_Call{Call: _e.mock.On("GetAll", ctx)}
 }
 
-func (_c *OrderUseCase_GetAll_Call) Run(run func()) *OrderUseCase_GetAll_Call {
+func (_c *OrderUseCase_GetAll_Call) Run(run func(ctx context.Context)) *OrderUseCase_GetAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		run(args[0].(context.Context))
 	})
 	return _c
 }
@@ -130,14 +134,14 @@ func (_c *OrderUseCase_GetAll_Call) Return(_a0 []domain.Order, _a1 error) *Order
 	return _c
 }
 
-func (_c *OrderUseCase_GetAll_Call) RunAndReturn(run func() ([]domain.Order, error)) *OrderUseCase_GetAll_Call {
+func (_c *OrderUseCase_GetAll_Call) RunAndReturn(run func(context.Context) ([]domain.Order, error)) *OrderUseCase_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetByID provides a mock function with given fields: id
-func (_m *OrderUseCase) GetByID(id int64) (*domain.Order, error) {
-	ret := _m.Called(id)
+// GetByID provides a mock function with given fields: ctx, id
+func (_m *OrderUseCase) GetByID(ctx context.Context, id int64) (*domain.Order, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByID")
@@ -145,19 +149,19 @@ func (_m *OrderUseCase) GetByID(id int64) (*domain.Order, error) {
 
 	var r0 *domain.Order
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) (*domain.Order, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) (*domain.Order, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(int64) *domain.Order); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) *domain.Order); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.Order)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -171,14 +175,15 @@ type OrderUseCase_GetByID_Call struct {
 }
 
 // GetByID is a helper method to define mock.On call
+//   - ctx context.Context
 //   - id int64
-func (_e *OrderUseCase_Expecter) GetByID(id interface{}) *OrderUseCase_GetByID_Call {
-	return &OrderUseCase_GetByID_Call{Call: _e.mock.On("GetByID", id)}
+func (_e *OrderUseCase_Expecter) GetByID(ctx interface{}, id interface{}) *OrderUseCase_GetByID_Call {
+	return &OrderUseCase_GetByID_Call{Call: _e.mock.On("GetByID", ctx, id)}
 }
 
-func (_c *OrderUseCase_GetByID_Call) Run(run func(id int64)) *OrderUseCase_GetByID_Call {
+func (_c *OrderUseCase_GetByID_Call) Run(run func(ctx context.Context, id int64)) *OrderUseCase_GetByID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int64))
+		run(args[0].(context.Context), args[1].(int64))
 	})
 	return _c
 }
@@ -188,7 +193,7 @@ func (_c *OrderUseCase_GetByID_Call) Return(_a0 *domain.Order, _a1 error) *Order
 	return _c
 }
 
-func (_c *OrderUseCase_GetByID_Call) RunAndReturn(run func(int64) (*domain.Order, error)) *OrderUseCase_GetByID_Call {
+func (_c *OrderUseCase_GetByID_Call) RunAndReturn(run func(context.Context, int64) (*domain.Order, error)) *OrderUseCase_GetByID_Call {
 	_c.Call.Return(run)
 	return _c
 }

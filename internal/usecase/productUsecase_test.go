@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/nicewook/gocore/internal/domain"
 	"github.com/nicewook/gocore/internal/domain/mocks"
@@ -44,9 +46,12 @@ func TestCreateProduct(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.ProductRepository)
-			mockRepo.On("Save", tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
+			if tt.mockInput.Name != "" && tt.mockInput.PriceInKRW > 0 {
+				mockRepo.On("Save", mock.Anything, tt.mockInput).Return(tt.mockReturn, tt.mockError)
+			}
 			uc := NewProductUseCase(mockRepo)
-			result, err := uc.CreateProduct(tt.mockInput)
+			ctx := context.Background()
+			result, err := uc.CreateProduct(ctx, tt.mockInput)
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)
 			mockRepo.AssertExpectations(t)
@@ -82,9 +87,10 @@ func TestGetProductByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.ProductRepository)
-			mockRepo.On("GetByID", tt.inputID).Return(tt.mockReturn, tt.mockError)
+			mockRepo.On("GetByID", mock.Anything, tt.inputID).Return(tt.mockReturn, tt.mockError)
 			uc := NewProductUseCase(mockRepo)
-			result, err := uc.GetByID(tt.inputID)
+			ctx := context.Background()
+			result, err := uc.GetByID(ctx, tt.inputID)
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)
 			mockRepo.AssertExpectations(t)
@@ -123,9 +129,10 @@ func TestGetAllProducts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.ProductRepository)
-			mockRepo.On("GetAll").Return(tt.mockReturn, tt.mockError)
+			mockRepo.On("GetAll", mock.Anything).Return(tt.mockReturn, tt.mockError)
 			uc := NewProductUseCase(mockRepo)
-			result, err := uc.GetAll()
+			ctx := context.Background()
+			result, err := uc.GetAll(ctx)
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)
 			mockRepo.AssertExpectations(t)

@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/nicewook/gocore/internal/domain"
 	"github.com/nicewook/gocore/internal/domain/mocks"
@@ -27,21 +29,23 @@ func TestCreateOrder(t *testing.T) {
 			expectErr:  nil,
 		},
 		{
-			name:      "InvalidInput",
-			mockInput: &domain.Order{UserID: 0, ProductID: 0, Quantity: 0, TotalPriceInKRW: 0},
-			mockError: domain.ErrInvalidInput,
-			expected:  nil,
-			expectErr: domain.ErrInvalidInput,
+			name:       "InvalidInput",
+			mockInput:  &domain.Order{UserID: 0, ProductID: 0, Quantity: 0, TotalPriceInKRW: 0},
+			mockReturn: nil,
+			mockError:  domain.ErrInvalidInput,
+			expected:   nil,
+			expectErr:  domain.ErrInvalidInput,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.OrderRepository)
-			mockRepo.On("Save", tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
+			mockRepo.On("Save", mock.Anything, tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
 
 			uc := NewOrderUseCase(mockRepo)
-			result, err := uc.CreateOrder(tt.mockInput)
+			ctx := context.Background()
+			result, err := uc.CreateOrder(ctx, tt.mockInput)
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)
@@ -80,10 +84,11 @@ func TestGetOrderByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.OrderRepository)
-			mockRepo.On("GetByID", tt.inputID).Return(tt.mockReturn, tt.mockError)
+			mockRepo.On("GetByID", mock.Anything, tt.inputID).Return(tt.mockReturn, tt.mockError)
 
 			uc := NewOrderUseCase(mockRepo)
-			result, err := uc.GetByID(tt.inputID)
+			ctx := context.Background()
+			result, err := uc.GetByID(ctx, tt.inputID)
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)
@@ -125,10 +130,11 @@ func TestGetAllOrders(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockRepo := new(mocks.OrderRepository)
-			mockRepo.On("GetAll").Return(tt.mockReturn, tt.mockError)
+			mockRepo.On("GetAll", mock.Anything).Return(tt.mockReturn, tt.mockError)
 
 			uc := NewOrderUseCase(mockRepo)
-			result, err := uc.GetAll()
+			ctx := context.Background()
+			result, err := uc.GetAll(ctx)
 
 			assert.Equal(t, tt.expected, result)
 			assert.Equal(t, tt.expectErr, err)

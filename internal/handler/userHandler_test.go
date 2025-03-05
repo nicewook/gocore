@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -55,69 +54,11 @@ func TestErrResponse(t *testing.T) {
 	}
 }
 
-func TestCreateUser(t *testing.T) {
-
-	tests := []struct {
-		name           string
-		input          string
-		mockInput      *domain.User
-		mockReturn     interface{}
-		mockError      error
-		expectedStatus int
-	}{
-		{
-			name:           "Success",
-			input:          `{"name":"John","email":"john@example.com"}`,
-			mockInput:      &domain.User{Name: "John", Email: "john@example.com"},
-			mockReturn:     &domain.User{Name: "John", Email: "john@example.com"},
-			mockError:      nil,
-			expectedStatus: http.StatusCreated,
-		},
-		{
-			name:           "InvalidInput",
-			input:          `{"name":"","email":""}`,
-			mockInput:      &domain.User{Name: "", Email: ""},
-			mockReturn:     nil,
-			mockError:      nil,
-			expectedStatus: http.StatusBadRequest,
-		},
-		{
-			name:           "AlreadyExists",
-			input:          `{"name":"John","email":"john@example.com"}`,
-			mockInput:      &domain.User{Name: "John", Email: "john@example.com"},
-			mockReturn:     nil,
-			mockError:      domain.ErrAlreadyExists,
-			expectedStatus: http.StatusConflict,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-
-			// echo context 생성
-			e := echo.New()
-			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(tt.input))
-			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-			rec := httptest.NewRecorder()
-			c := e.NewContext(req, rec)
-
-			// mock 생성, 설정및 핸들러 생성
-			mockUseCase := new(mocks.UserUseCase)
-			mockUseCase.On("CreateUser", tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
-			handler := NewUserHandler(e, mockUseCase)
-
-			// 핸들러 실행 및 검증
-			err := handler.CreateUser(c)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.expectedStatus, rec.Code)
-
-			// mock 호출 검증
-			mockUseCase.AssertExpectations(t)
-
-		})
-	}
-}
 func TestGetByID(t *testing.T) {
+	// 사용자 역할 정의
+	userRoles := []string{domain.RoleUser}
+	adminRoles := []string{domain.RoleAdmin, domain.RoleUser}
+
 	tests := []struct {
 		name           string
 		pathParam      string
@@ -129,10 +70,18 @@ func TestGetByID(t *testing.T) {
 		{
 			name:           "Get user by ID successfully",
 			pathParam:      "1",
-			mockReturn:     &domain.User{ID: 1, Name: "John", Email: "john@example.com"},
+			mockReturn:     &domain.User{ID: 1, Name: "John", Email: "john@example.com", Roles: userRoles},
 			mockError:      nil,
 			expectedStatus: http.StatusOK,
-			expectedBody:   `{"id":1,"name":"John","email":"john@example.com"}`,
+			expectedBody:   fmt.Sprintf(`{"id":1,"name":"John","email":"john@example.com","roles":["%s"]}`, domain.RoleUser),
+		},
+		{
+			name:           "Get admin by ID successfully",
+			pathParam:      "2",
+			mockReturn:     &domain.User{ID: 2, Name: "Admin", Email: "admin@example.com", Roles: adminRoles},
+			mockError:      nil,
+			expectedStatus: http.StatusOK,
+			expectedBody:   fmt.Sprintf(`{"id":2,"name":"Admin","email":"admin@example.com","roles":["%s","%s"]}`, domain.RoleAdmin, domain.RoleUser),
 		},
 		{
 			name:           "User not found",
@@ -154,7 +103,6 @@ func TestGetByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			// echo context 생성
 			e := echo.New()
 			req := httptest.NewRequest(http.MethodGet, "/users/"+tt.pathParam, nil)
@@ -165,7 +113,7 @@ func TestGetByID(t *testing.T) {
 
 			// mcok 생성, 설정 및 핸들러 생성
 			mockUseCase := new(mocks.UserUseCase)
-			mockUseCase.On("GetByID", mock.Anything).Return(tt.mockReturn, tt.mockError).Maybe()
+			mockUseCase.On("GetByID", mock.Anything, mock.Anything).Return(tt.mockReturn, tt.mockError).Maybe()
 			handler := NewUserHandler(e, mockUseCase)
 
 			// 핸들러 실행 및 검증
@@ -181,6 +129,9 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
+	// 사용자 역할 정의
+	userRoles := []string{domain.RoleUser}
+	managerRoles := []string{domain.RoleManager, domain.RoleUser}
 
 	tests := []struct {
 		name           string
@@ -192,12 +143,12 @@ func TestGetAll(t *testing.T) {
 		{
 			name: "Get all users successfully",
 			mockReturn: []domain.User{
-				{ID: 1, Name: "John", Email: "john@example.com"},
-				{ID: 2, Name: "Jane", Email: "jane@example.com"},
+				{ID: 1, Name: "John", Email: "john@example.com", Roles: userRoles},
+				{ID: 2, Name: "Jane", Email: "jane@example.com", Roles: managerRoles},
 			},
 			mockError:      nil,
 			expectedStatus: http.StatusOK,
-			expectedBody:   `[{"id":1,"name":"John","email":"john@example.com"},{"id":2,"name":"Jane","email":"jane@example.com"}]`,
+			expectedBody:   fmt.Sprintf(`[{"id":1,"name":"John","email":"john@example.com","roles":["%s"]},{"id":2,"name":"Jane","email":"jane@example.com","roles":["%s","%s"]}]`, domain.RoleUser, domain.RoleManager, domain.RoleUser),
 		},
 		{
 			name:           "No users found",
@@ -218,7 +169,7 @@ func TestGetAll(t *testing.T) {
 
 			// mock 생성, 설정 및 핸들러 생성
 			mockUseCase := new(mocks.UserUseCase)
-			mockUseCase.On("GetAll").Return(tt.mockReturn, tt.mockError)
+			mockUseCase.On("GetAll", mock.Anything).Return(tt.mockReturn, tt.mockError)
 			handler := NewUserHandler(e, mockUseCase)
 
 			// 핸들러 실행 및 검증

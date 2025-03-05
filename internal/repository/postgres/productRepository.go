@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -18,13 +19,13 @@ func NewProductRepository(db *sql.DB) domain.ProductRepository {
 	return &productRepository{db: db}
 }
 
-func (r *productRepository) Save(product *domain.Product) (*domain.Product, error) {
+func (r *productRepository) Save(ctx context.Context, product *domain.Product) (*domain.Product, error) {
 	const query = `
 		INSERT INTO products (name, price_in_krw)
 		VALUES ($1, $2)
 		RETURNING id
 	`
-	if err := r.db.QueryRow(query, product.Name, product.PriceInKRW).Scan(&product.ID); err != nil {
+	if err := r.db.QueryRowContext(ctx, query, product.Name, product.PriceInKRW).Scan(&product.ID); err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			return nil, fmt.Errorf("product %s: %w", product.Name, domain.ErrAlreadyExists)
 		}
@@ -33,14 +34,14 @@ func (r *productRepository) Save(product *domain.Product) (*domain.Product, erro
 	return product, nil
 }
 
-func (r *productRepository) GetByID(id int64) (*domain.Product, error) {
+func (r *productRepository) GetByID(ctx context.Context, id int64) (*domain.Product, error) {
 	query := `
 		SELECT id, name, price_in_krw
 		FROM products
 		WHERE id = $1
 	`
 	var product domain.Product
-	err := r.db.QueryRow(query, id).Scan(&product.ID, &product.Name, &product.PriceInKRW)
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&product.ID, &product.Name, &product.PriceInKRW)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrNotFound
@@ -50,13 +51,13 @@ func (r *productRepository) GetByID(id int64) (*domain.Product, error) {
 	return &product, nil
 }
 
-func (r *productRepository) GetAll() ([]domain.Product, error) {
+func (r *productRepository) GetAll(ctx context.Context) ([]domain.Product, error) {
 	query := `
 		SELECT id, name, price_in_krw
 		FROM products
 		ORDER BY id ASC
 	`
-	rows, err := r.db.Query(query)
+	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all products: %w", err)
 	}

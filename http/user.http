@@ -1,47 +1,22 @@
-### Send POST request with json body
-POST http://localhost:8080/users
-Content-Type: application/json
+### Variables
+@baseUrl = http://localhost:8080
+@accessToken = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6Imh5dW5zZW9rLmplb25nQGdtYWlsLmNvbSIsInJvbGVzIjpbIlVzZXIiXSwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTc0MjI3MjA5NSwiaWF0IjoxNzQyMjY4NDk1fQ.QliY1ffGEfBRlDkwdSaJfNwf-KEarLd06rbBfT29Jb3-hhwwowEWg2P6raVaL2tohkcXBRNJlG7dlb12WoOcjJLC1tdgI1rYWvZ-3U8EMU7twOV4zb0oTbVVA8iRxvxFJVxU3eDbI0KM95cjdNWqzk9oahofOyP7bolq153L5BAgel7ZJWDJHi9KaJfbxHx9WZBVCtX7uNdDvodI4XIAEQLUjkguOFW6yqM35AL7ZDSvWs62jGZ7GkovWC6RJlYJpiYqGwFei5g83AL4W5Z1_9OONvL-XEY_XFo4aWG1luGX2IG4OAP3zyNsjPmzRa8uqKUs7t-JiREhXUeVkc0Kyg
 
-{
-  "name": "Hyunseok Jeong",
-  "email": "hyunseok.jeong@gmail.com"
-}
-
-### Send POST request with json body
-POST http://localhost:8080/users
-Content-Type: application/json
-
-{
-  "name": "Hyunseok Jeong 2",
-  "email": "hyunseok.jeong2@gmail.com"
-}
-
-### Send POST request with json body
-POST http://localhost:8080/users
-Content-Type: application/json
-
-{
-  "name": "Hyunseok Jeong 3",
-  "email": "hyunseok.jeong3@gmail.com"
-}
-
-### Send POST request with json body
-POST http://localhost:8080/users
-Content-Type: application/json
-
-{
-  "name": "Hyunseok Jeong 4",
-  "email": "hyunseok.jeong4@gmail.com"
-}
-
-### GET user by id
-GET http://localhost:8080/users/1
+### Fetch All Users
+# @name getAllUsers
+GET {{baseUrl}}/users
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
-### GET user by wrong id
-GET http://localhost:8080/users/10000
+### User 1 가져오기
+# @name getUser1
+GET {{baseUrl}}/users/1
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
-### GET all users
-GET http://localhost:8080/users
+### 없는 User 가져오기 시도
+# @name getUserInvalid
+GET {{baseUrl}}/users/10000
 Accept: application/json
+Authorization: Bearer {{accessToken}}
+

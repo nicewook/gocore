@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/nicewook/gocore/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -20,9 +22,9 @@ func (_m *ProductUseCase) EXPECT() *ProductUseCase_Expecter {
 	return &ProductUseCase_Expecter{mock: &_m.Mock}
 }
 
-// CreateProduct provides a mock function with given fields: product
-func (_m *ProductUseCase) CreateProduct(product *domain.Product) (*domain.Product, error) {
-	ret := _m.Called(product)
+// CreateProduct provides a mock function with given fields: ctx, product
+func (_m *ProductUseCase) CreateProduct(ctx context.Context, product *domain.Product) (*domain.Product, error) {
+	ret := _m.Called(ctx, product)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateProduct")
@@ -30,19 +32,19 @@ func (_m *ProductUseCase) CreateProduct(product *domain.Product) (*domain.Produc
 
 	var r0 *domain.Product
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*domain.Product) (*domain.Product, error)); ok {
-		return rf(product)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Product) (*domain.Product, error)); ok {
+		return rf(ctx, product)
 	}
-	if rf, ok := ret.Get(0).(func(*domain.Product) *domain.Product); ok {
-		r0 = rf(product)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Product) *domain.Product); ok {
+		r0 = rf(ctx, product)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.Product)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*domain.Product) error); ok {
-		r1 = rf(product)
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.Product) error); ok {
+		r1 = rf(ctx, product)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -56,14 +58,15 @@ type ProductUseCase_CreateProduct_Call struct {
 }
 
 // CreateProduct is a helper method to define mock.On call
+//   - ctx context.Context
 //   - product *domain.Product
-func (_e *ProductUseCase_Expecter) CreateProduct(product interface{}) *ProductUseCase_CreateProduct_Call {
-	return &ProductUseCase_CreateProduct_Call{Call: _e.mock.On("CreateProduct", product)}
+func (_e *ProductUseCase_Expecter) CreateProduct(ctx interface{}, product interface{}) *ProductUseCase_CreateProduct_Call {
+	return &ProductUseCase_CreateProduct_Call{Call: _e.mock.On("CreateProduct", ctx, product)}
 }
 
-func (_c *ProductUseCase_CreateProduct_Call) Run(run func(product *domain.Product)) *ProductUseCase_CreateProduct_Call {
+func (_c *ProductUseCase_CreateProduct_Call) Run(run func(ctx context.Context, product *domain.Product)) *ProductUseCase_CreateProduct_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*domain.Product))
+		run(args[0].(context.Context), args[1].(*domain.Product))
 	})
 	return _c
 }
@@ -73,14 +76,14 @@ func (_c *ProductUseCase_CreateProduct_Call) Return(_a0 *domain.Product, _a1 err
 	return _c
 }
 
-func (_c *ProductUseCase_CreateProduct_Call) RunAndReturn(run func(*domain.Product) (*domain.Product, error)) *ProductUseCase_CreateProduct_Call {
+func (_c *ProductUseCase_CreateProduct_Call) RunAndReturn(run func(context.Context, *domain.Product) (*domain.Product, error)) *ProductUseCase_CreateProduct_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetAll provides a mock function with no fields
-func (_m *ProductUseCase) GetAll() ([]domain.Product, error) {
-	ret := _m.Called()
+// GetAll provides a mock function with given fields: ctx
+func (_m *ProductUseCase) GetAll(ctx context.Context) ([]domain.Product, error) {
+	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
@@ -88,19 +91,19 @@ func (_m *ProductUseCase) GetAll() ([]domain.Product, error) {
 
 	var r0 []domain.Product
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]domain.Product, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(context.Context) ([]domain.Product, error)); ok {
+		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func() []domain.Product); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(context.Context) []domain.Product); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.Product)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -114,13 +117,14 @@ type ProductUseCase_GetAll_Call struct {
 }
 
 // GetAll is a helper method to define mock.On call
-func (_e *ProductUseCase_Expecter) GetAll() *ProductUseCase_GetAll_Call {
-	return &ProductUseCase_GetAll_Call{Call: _e.mock.On("GetAll")}
+//   - ctx context.Context
+func (_e *ProductUseCase_Expecter) GetAll(ctx interface{}) *ProductUseCase_GetAll_Call {
+	return &ProductUseCase_GetAll_Call{Call: _e.mock.On("GetAll", ctx)}
 }
 
-func (_c *ProductUseCase_GetAll_Call) Run(run func()) *ProductUseCase_GetAll_Call {
+func (_c *ProductUseCase_GetAll_Call) Run(run func(ctx context.Context)) *ProductUseCase_GetAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		run(args[0].(context.Context))
 	})
 	return _c
 }
@@ -130,14 +134,14 @@ func (_c *ProductUseCase_GetAll_Call) Return(_a0 []domain.Product, _a1 error) *P
 	return _c
 }
 
-func (_c *ProductUseCase_GetAll_Call) RunAndReturn(run func() ([]domain.Product, error)) *ProductUseCase_GetAll_Call {
+func (_c *ProductUseCase_GetAll_Call) RunAndReturn(run func(context.Context) ([]domain.Product, error)) *ProductUseCase_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetByID provides a mock function with given fields: id
-func (_m *ProductUseCase) GetByID(id int64) (*domain.Product, error) {
-	ret := _m.Called(id)
+// GetByID provides a mock function with given fields: ctx, id
+func (_m *ProductUseCase) GetByID(ctx context.Context, id int64) (*domain.Product, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByID")
@@ -145,19 +149,19 @@ func (_m *ProductUseCase) GetByID(id int64) (*domain.Product, error) {
 
 	var r0 *domain.Product
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) (*domain.Product, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) (*domain.Product, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(int64) *domain.Product); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) *domain.Product); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.Product)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -171,14 +175,15 @@ type ProductUseCase_GetByID_Call struct {
 }
 
 // GetByID is a helper method to define mock.On call
+//   - ctx context.Context
 //   - id int64
-func (_e *ProductUseCase_Expecter) GetByID(id interface{}) *ProductUseCase_GetByID_Call {
-	return &ProductUseCase_GetByID_Call{Call: _e.mock.On("GetByID", id)}
+func (_e *ProductUseCase_Expecter) GetByID(ctx interface{}, id interface{}) *ProductUseCase_GetByID_Call {
+	return &ProductUseCase_GetByID_Call{Call: _e.mock.On("GetByID", ctx, id)}
 }
 
-func (_c *ProductUseCase_GetByID_Call) Run(run func(id int64)) *ProductUseCase_GetByID_Call {
+func (_c *ProductUseCase_GetByID_Call) Run(run func(ctx context.Context, id int64)) *ProductUseCase_GetByID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int64))
+		run(args[0].(context.Context), args[1].(int64))
 	})
 	return _c
 }
@@ -188,7 +193,7 @@ func (_c *ProductUseCase_GetByID_Call) Return(_a0 *domain.Product, _a1 error) *P
 	return _c
 }
 
-func (_c *ProductUseCase_GetByID_Call) RunAndReturn(run func(int64) (*domain.Product, error)) *ProductUseCase_GetByID_Call {
+func (_c *ProductUseCase_GetByID_Call) RunAndReturn(run func(context.Context, int64) (*domain.Product, error)) *ProductUseCase_GetByID_Call {
 	_c.Call.Return(run)
 	return _c
 }

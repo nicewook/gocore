@@ -33,7 +33,9 @@ func (h *ProductHandler) CreateProduct(c echo.Context) error {
 	if product.Name == "" || product.PriceInKRW <= 0 {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
-	createdProduct, err := h.productUseCase.CreateProduct(product)
+
+	ctx := c.Request().Context()
+	createdProduct, err := h.productUseCase.CreateProduct(ctx, product)
 	if err == nil {
 		return c.JSON(http.StatusCreated, createdProduct)
 	}
@@ -52,7 +54,9 @@ func (h *ProductHandler) GetByID(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
-	product, err := h.productUseCase.GetByID(int64(id))
+
+	ctx := c.Request().Context()
+	product, err := h.productUseCase.GetByID(ctx, int64(id))
 	if err == nil {
 		return c.JSON(http.StatusOK, product)
 	}
@@ -65,7 +69,8 @@ func (h *ProductHandler) GetByID(c echo.Context) error {
 }
 
 func (h *ProductHandler) GetAll(c echo.Context) error {
-	products, err := h.productUseCase.GetAll()
+	ctx := c.Request().Context()
+	products, err := h.productUseCase.GetAll(ctx)
 	if err == nil {
 		return c.JSON(http.StatusOK, products)
 	}

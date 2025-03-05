@@ -35,7 +35,8 @@ func (h *OrderHandler) CreateOrder(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
-	createdOrder, err := h.orderUseCase.CreateOrder(&order)
+	ctx := c.Request().Context()
+	createdOrder, err := h.orderUseCase.CreateOrder(ctx, &order)
 	if err == nil {
 		return c.JSON(http.StatusCreated, createdOrder)
 	}
@@ -56,7 +57,8 @@ func (h *OrderHandler) GetByID(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
-	order, err := h.orderUseCase.GetByID(int64(id))
+	ctx := c.Request().Context()
+	order, err := h.orderUseCase.GetByID(ctx, int64(id))
 	if err == nil {
 		return c.JSON(http.StatusOK, order)
 	}
@@ -69,7 +71,8 @@ func (h *OrderHandler) GetByID(c echo.Context) error {
 }
 
 func (h *OrderHandler) GetAll(c echo.Context) error {
-	orders, err := h.orderUseCase.GetAll()
+	ctx := c.Request().Context()
+	orders, err := h.orderUseCase.GetAll(ctx)
 	if err == nil {
 		return c.JSON(http.StatusOK, orders)
 	}

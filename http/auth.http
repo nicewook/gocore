@@ -1,0 +1,46 @@
+### Variables
+@baseUrl = http://localhost:8080
+@accessToken = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJlbWFpbCI6Imh5dW5zZW9rLmplb25nQGdtYWlsLmNvbSIsInJvbGVzIjpbIlVzZXIiXSwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTc0MjI3MTczNiwiaWF0IjoxNzQyMjY4MTM2fQ.RcwAzoEYBZEQoopo6BIhxd8o_9364HX4K5_PKWcsuyWEyd8piZVyfjEQFt_8OnHePsyFNT2JxZecvNGinxJ6C2v6Y1e3PZHbj-t0p2vpgpRrWzE1uEyyYfpYxQxiV60084sxjeP3A-Hod2VeXKnPtD1A7DS_ZsEvdPeGeVC-Zlq_n3JhDc8vwf7farGaTNvd0rgyHJjhdQmbC4IGKnd3Qp6ciN_4KtW2NvjgzKP3JpG-JMJCv9p-3gDzZqgewcgTeW838I1tSMyooqX34lb-R-iqPnImVO9Wxl4hfNKHSMoa2c7oDlOvy3oRodkFpKM_INowsURJr-tbUto6mrDqHA
+
+
+### Send POST SignUp request with json body
+POST http://localhost:8080/auth/signup
+Content-Type: application/json
+
+{
+  "email": "hyunseok.jeong@gmail.com",
+  "password": "my-password"
+}
+
+### Send POST SignUp request with json body
+POST http://localhost:8080/auth/signup
+Content-Type: application/json
+
+{
+  "email": "hyunseok.jeong2@gmail.com",
+  "password": "my-password"
+}
+
+### Send POST Login request
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "hyunseok.jeong@gmail.com",
+  "password": "my-password"
+}
+
+### Send POST Login request Admin
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@gmail.com",
+  "password": "adminpassword"
+}
+
+### Send POST Logout request
+
+POST http://localhost:8080/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}

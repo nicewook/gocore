@@ -56,3 +56,11 @@ Mockery를 사용하여 Mock을 만들어 테스트에 사용한다.
 RequestID, Logging 미들웨어를 고도화하여 요청에 대한 로깅을 강화한다. 
 - 브랜치: 6_logging
 - 블로그 포스팅:- https://jusths.tistory.com/448
+
+### 7. 인증과 인가
+JWT를 사용하여 인증과 인가를 구현한다.
+- 브랜치: 7_authentication
+- 블로그 포스팅:
+  - https://jusths.tistory.com/451
+  - https://jusths.tistory.com/452
+  - https://jusths.tistory.com/453

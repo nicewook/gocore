@@ -1,7 +1,7 @@
 app:
   env: "dev"
   port: 8080
-  debug: false
+  debug: true
   log_level: "debug"
 
 db:
@@ -17,3 +17,51 @@ secure:
     - "http://your.frontend.com"
     - "http://localhost:3000"
     - "http://localhost"
+  jwt:
+    # 개발 환경용 RSA 키 (실제 환경에서는 더 강력한 키 사용 필요)
+    # 이 키들은 예시일 뿐이며, 실제 환경에서는 안전하게 생성된 키를 사용해야 합니다.
+    private_key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEArWuu7D64bexQ4jMYog8myNsBnFv3cISOhxex7rZBy8mcs/xa
+      qs7OFGbJof//62Uj+MU0vGN2e9EwBTmlTQct38b63K4ghLxqU5YuWd51LZiwHr2C
+      rBSH2RtNnWeWGvhg4ZGcFFX6+g2LmkYHRzN04y7O/uqqnXKvL2AV83LH0jwGdZ6m
+      BlLobFdD1JUwr2xA+BKjTt8COcfoNBMzoOCVIfiwbEO4mFmlyteFjpA84acAM6MA
+      gC873UCzNFp309JAnTyM0659ljFEh0e+l+ne3brhje9AIHLnEAUiZAIrbZT6/rZM
+      rImhCT+AK3yj0p9YMBv1y8iOx0c1p7iYT0UsEQIDAQABAoIBACNr3TyvyufY3uR0
+      31EqmxdndDrFphK7YIlDU7qYS3QeZ/1zS+mbeAg+vmxyZ4ljDSfgz9ay0h6UKaTH
+      k3XaQ4pzkAXHIyk5etY71JfSkkiP6Vk+CBSx1NWJeB7wa35ywQcRwLl+nla4sYz/
+      RLlMT1Gf2/PBZrvmEtYwYAtrpFjSR3AxsMCr2Fjwe8V4bCbBN3WxAqOAXT9YBpFG
+      yKVLE3w9EKuD6XOCVaceOZw0Aq6WS/QG42M0bLgaJigGuQPAMGcnRX18I6aypwT/
+      3ejOL3l4kD59xhwiEovYAyNO1wUQG8GxwdLI5lbB41OKm+CWdy2fCen7SwW1H17G
+      xCJSvmECgYEA5fd3qX7oHxt/nFUlYFCdkW54efPuv/G5gYo8qG361sMViOzXqoFV
+      k/uum+Aga3PRQDetjJ0oVeGEDpuqnNAySOmtCBlf/BKGhj72tQ0w2yMUDRw8ZUj8
+      nA3jn2lDKVRPhQQdlqGUknqJnfVOB9ML8dtjqcs7W9vOJtZMnUHvfOUCgYEAwQ18
+      1k+3HJtfp2JJkn/UCVQfCC8Cc3mkCFETIasoSCgHIQ+SNX9TJWczm8xkmB7oonMq
+      IfSzl/vVxH4gGJ/FrZZr0eZMzR3N5kJe+xIpClCCnRPpdnpv7kGdCW/6vyo7dlOw
+      A5AgS36adSL7e0+WAVBa+nllIhI3XSddUF1Vq70CgYASBaLLFbb7ORx3E/Up5ydy
+      DkZCyGsdf8QZ8stuJ7BQxFkbsfP02M3sGv1EGfxwb1MmxTZEnsxabqH6wxhL0cUf
+      EbENwW9UQd9pBeYvqij6A3W+0UeqaF3jnPMJuyYYRxM0SW5IL8GE+TVvu5mx40g8
+      XAUjeVndiQxO3tyCNnieQQKBgH/d/yG0CwTXpLOpVjHCmR7UqPkyqdzyZMNdb96N
+      D1E7sf0j4yOsAdZ0VKqM5tQbJNr0jKORAKNaGmzbXUbyDGy9hQyyDYyOgSJSM7b4
+      gFZknR6NYcUns5uLugfWM68KuffV1m+Ftt5KLOQJF6jFPgYAw0HDxkia6DC7MgNY
+      zrXBAoGBAMN8RP8aaz7lsiGMHWV8iwoIGS8SsUTlJpUQqAkh7gzfN0EWdHsPnd3s
+      Atyavvf6W7F2uR9sQ4jD+7ytPdy26FcNBn3jopSHUKA2ANYmOIjQyyPGyd3Yw4U/
+      YPqtDJVJ5UI3gWeV0G1T/Ocg6p0BsTDCDp+mJxmY1sH0zHMxm4vi
+      -----END RSA PRIVATE KEY-----
+    public_key: |
+      -----BEGIN PUBLIC KEY-----
+      MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArWuu7D64bexQ4jMYog8m
+      yNsBnFv3cISOhxex7rZBy8mcs/xaqs7OFGbJof//62Uj+MU0vGN2e9EwBTmlTQct
+      38b63K4ghLxqU5YuWd51LZiwHr2CrBSH2RtNnWeWGvhg4ZGcFFX6+g2LmkYHRzN0
+      4y7O/uqqnXKvL2AV83LH0jwGdZ6mBlLobFdD1JUwr2xA+BKjTt8COcfoNBMzoOCV
+      IfiwbEO4mFmlyteFjpA84acAM6MAgC873UCzNFp309JAnTyM0659ljFEh0e+l+ne
+      3brhje9AIHLnEAUiZAIrbZT6/rZMrImhCT+AK3yj0p9YMBv1y8iOx0c1p7iYT0Us
+      EQIDAQAB
+      -----END PUBLIC KEY-----
+    access_expiration_min: 60   # 60분
+    refresh_expiration_day: 30  # 30일
+    cookie:
+      secure: false  # 개발 환경에서는 false, 운영 환경에서는 true
+      http_only: true
+      same_site: "Lax"  # Strict, Lax, None 중 하나
+      domain: "localhost"

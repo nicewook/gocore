@@ -7,10 +7,13 @@ import (
 	"strings"
 	"time"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"golang.org/x/time/rate"
+
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/nicewook/gocore/internal/config"
 	"github.com/nicewook/gocore/pkg/contextutil"
@@ -35,6 +38,14 @@ func RegisterMiddlewares(cfg *config.Config, logger *slog.Logger, e *echo.Echo) 
 			c.SetRequest(req.WithContext(ctx))
 		},
 	}))
+
+	// ✅ Config: 설정 정보를 컨텍스트에 추가
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			c.Set("config", cfg)
+			return next(c)
+		}
+	})
 
 	// ✅ Logger: 커스텀 로거 사용
 	// echo 에서 제공하는 RequestID, Logger 미들웨어를 사용하지 않고 직접 구현한 LoggerMiddleware 사용
@@ -223,5 +234,84 @@ func RegisterMiddlewares(cfg *config.Config, logger *slog.Logger, e *echo.Echo) 
 
 		// Referrer-Policy 강화
 		ReferrerPolicy: "no-referrer",
+	}))
+
+	// ✅ JWT 인증
+	e.Use(echojwt.WithConfig(echojwt.Config{
+		// 공개키 파싱
+		SigningKey: func() interface{} {
+			publicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(cfg.Secure.JWT.PublicKey))
+			if err != nil {
+				logger.Error("Failed to parse RSA public key", "error", err)
+				return nil
+			}
+			return publicKey
+		}(),
+		SigningMethod: "RS256",
+		// ErrorHandler 는 JWT 가  실패해도 무시하도록 하고, ContinueOnIgnoredError 를 true 로 설정
+		// 이렇게 하면 JWT 검증 실패 시 미들웨어가 무시되고 다음 미들웨어가 실행된다.
+		// ErrorHandler: 토큰이 없는 경우만 무시하고 다른 오류는 반환
+		ErrorHandler: func(c echo.Context, err error) error {
+			// 토큰이 없는 경우는 패스해준다.
+			// 1. errors.Is로 ErrJWTMissing과 비교 (TokenExtractionError도 포함)
+			// 2. 에러 메시지로 확인 (추가 안전장치)
+			if errors.Is(err, echojwt.ErrJWTMissing) {
+				if cfg.App.Debug {
+					logger.Debug("JWT token is missing",
+						"path", c.Path(),
+						"method", c.Request().Method)
+				}
+				return nil // 토큰이 없는 경우만 무시
+			}
+
+			// 토큰이 있지만 문제가 있는 경우를 체크한다 (만료, 서명 불일치 등)
+			var statusCode int
+			var errorMsg string
+
+			switch {
+			case errors.Is(err, jwt.ErrTokenExpired):
+				statusCode = http.StatusUnauthorized
+				errorMsg = "Token has expired"
+				// Debug 모드일 때만 로깅
+				if cfg.App.Debug {
+					logger.Info("JWT token expired",
+						"path", c.Path(),
+						"method", c.Request().Method)
+				}
+
+			case errors.Is(err, jwt.ErrTokenSignatureInvalid):
+				statusCode = http.StatusUnauthorized
+				errorMsg = "Invalid token signature"
+				// 보안 관련 경고는 항상 로깅 (선택적)
+				logger.Warn("JWT token has invalid signature",
+					"path", c.Path(),
+					"method", c.Request().Method)
+
+			case errors.Is(err, jwt.ErrTokenNotValidYet):
+				statusCode = http.StatusUnauthorized
+				errorMsg = "Token not valid yet"
+				// Debug 모드일 때만 로깅
+				if cfg.App.Debug {
+					logger.Info("JWT token not valid yet",
+						"path", c.Path(),
+						"method", c.Request().Method)
+				}
+
+			default:
+				statusCode = http.StatusUnauthorized
+				errorMsg = "Invalid or malformed token"
+				if cfg.App.Debug {
+					logger.Warn("JWT validation failed",
+						"error", err.Error(),
+						"path", c.Path(),
+						"method", c.Request().Method)
+				}
+			}
+
+			return c.JSON(statusCode, map[string]string{
+				"error": errorMsg,
+			})
+		},
+		ContinueOnIgnoredError: true,
 	}))
 }

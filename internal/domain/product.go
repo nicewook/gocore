@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type Product struct {
 	ID         int64  `json:"id"`
 	Name       string `json:"name"`
@@ -7,13 +9,13 @@ type Product struct {
 }
 
 type ProductRepository interface {
-	Save(product *Product) (*Product, error)
-	GetByID(id int64) (*Product, error)
-	GetAll() ([]Product, error)
+	Save(ctx context.Context, product *Product) (*Product, error)
+	GetByID(ctx context.Context, id int64) (*Product, error)
+	GetAll(ctx context.Context) ([]Product, error)
 }
 
 type ProductUseCase interface {
-	CreateProduct(product *Product) (*Product, error)
-	GetByID(id int64) (*Product, error)
-	GetAll() ([]Product, error)
+	CreateProduct(ctx context.Context, product *Product) (*Product, error)
+	GetByID(ctx context.Context, id int64) (*Product, error)
+	GetAll(ctx context.Context) ([]Product, error)
 }

@@ -29,7 +29,23 @@ type DBConfig struct {
 }
 
 type SecureConfig struct {
-	CORSAllowOrigins []string `mapstructure:"cors_allow_origins"`
+	CORSAllowOrigins []string  `mapstructure:"cors_allow_origins"`
+	JWT              JWTConfig `mapstructure:"jwt"`
+}
+
+type JWTConfig struct {
+	PrivateKey           string       `mapstructure:"private_key"`            // RSA 개인키 (서명용)
+	PublicKey            string       `mapstructure:"public_key"`             // RSA 공개키 (검증용)
+	AccessExpirationMin  int          `mapstructure:"access_expiration_min"`  // Access Token 만료 시간 (분)
+	RefreshExpirationDay int          `mapstructure:"refresh_expiration_day"` // Refresh Token 만료 시간 (일)
+	Cookie               CookieConfig `mapstructure:"cookie"`                 // 쿠키 관련 설정
+}
+
+type CookieConfig struct {
+	Secure   bool   `mapstructure:"secure"`    // HTTPS 전용 여부
+	HTTPOnly bool   `mapstructure:"http_only"` // JavaScript 접근 불가 여부
+	SameSite string `mapstructure:"same_site"` // SameSite 정책 (Strict, Lax, None)
+	Domain   string `mapstructure:"domain"`    // 쿠키 도메인
 }
 
 func LoadConfig(env string) (*Config, error) {

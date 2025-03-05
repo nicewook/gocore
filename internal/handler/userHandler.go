@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/nicewook/gocore/internal/domain"
+	"github.com/nicewook/gocore/internal/middlewares"
 	"github.com/nicewook/gocore/pkg/contextutil"
 )
 
@@ -19,9 +20,8 @@ func NewUserHandler(e *echo.Echo, userUseCase domain.UserUseCase) *UserHandler {
 	handler := &UserHandler{userUseCase: userUseCase}
 
 	group := e.Group("/users")
-	group.POST("", handler.CreateUser)
-	group.GET("", handler.GetAll)
-	group.GET("/:id", handler.GetByID)
+	group.GET("", handler.GetAll, middlewares.AllowRoles(domain.RoleAdmin))
+	group.GET("/:id", handler.GetByID, middlewares.AllowRoles(domain.RoleAdmin, domain.RoleUser))
 
 	return handler
 }
@@ -38,38 +38,14 @@ func ErrResponse(err error) map[string]string {
 	}
 }
 
-func (h *UserHandler) CreateUser(c echo.Context) error {
-	user := new(domain.User)
-	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
-	}
-
-	if user.Name == "" || user.Email == "" {
-		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
-	}
-
-	createdUser, err := h.userUseCase.CreateUser(user)
-	if err == nil {
-		return c.JSON(http.StatusCreated, createdUser)
-	}
-
-	switch {
-	case errors.Is(err, domain.ErrInvalidInput):
-		return c.JSON(http.StatusBadRequest, ErrResponse(err))
-	case errors.Is(err, domain.ErrAlreadyExists):
-		return c.JSON(http.StatusConflict, ErrResponse(err))
-	default:
-		return c.JSON(http.StatusInternalServerError, ErrResponse(domain.ErrInternal))
-	}
-}
-
 func (h *UserHandler) GetByID(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
-	user, err := h.userUseCase.GetByID(int64(id))
+	ctx := c.Request().Context()
+	user, err := h.userUseCase.GetByID(ctx, int64(id))
 	if err == nil {
 		return c.JSON(http.StatusOK, user)
 	}
@@ -85,7 +61,13 @@ func (h *UserHandler) GetAll(c echo.Context) error {
 	logger := contextutil.GetLogger(c.Request().Context())
 	logger.Info("UserHandler:GetAll")
 
-	users, err := h.userUseCase.GetAll()
+	// Authorization 헤더 확인
+	authHeader := c.Request().Header.Get("Authorization")
+	logger.Debug("Authorization header", "value", authHeader)
+
+	ctx := c.Request().Context()
+	// 인증 없이도 사용자 목록 반환
+	users, err := h.userUseCase.GetAll(ctx)
 	if err == nil {
 		return c.JSON(http.StatusOK, users)
 	}

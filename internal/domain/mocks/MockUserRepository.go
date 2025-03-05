@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	domain "github.com/nicewook/gocore/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -20,9 +22,9 @@ func (_m *UserRepository) EXPECT() *UserRepository_Expecter {
 	return &UserRepository_Expecter{mock: &_m.Mock}
 }
 
-// GetAll provides a mock function with no fields
-func (_m *UserRepository) GetAll() ([]domain.User, error) {
-	ret := _m.Called()
+// GetAll provides a mock function with given fields: ctx
+func (_m *UserRepository) GetAll(ctx context.Context) ([]domain.User, error) {
+	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
@@ -30,19 +32,19 @@ func (_m *UserRepository) GetAll() ([]domain.User, error) {
 
 	var r0 []domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]domain.User, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(context.Context) ([]domain.User, error)); ok {
+		return rf(ctx)
 	}
-	if rf, ok := ret.Get(0).(func() []domain.User); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(context.Context) []domain.User); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -56,13 +58,14 @@ type UserRepository_GetAll_Call struct {
 }
 
 // GetAll is a helper method to define mock.On call
-func (_e *UserRepository_Expecter) GetAll() *UserRepository_GetAll_Call {
-	return &UserRepository_GetAll_Call{Call: _e.mock.On("GetAll")}
+//   - ctx context.Context
+func (_e *UserRepository_Expecter) GetAll(ctx interface{}) *UserRepository_GetAll_Call {
+	return &UserRepository_GetAll_Call{Call: _e.mock.On("GetAll", ctx)}
 }
 
-func (_c *UserRepository_GetAll_Call) Run(run func()) *UserRepository_GetAll_Call {
+func (_c *UserRepository_GetAll_Call) Run(run func(ctx context.Context)) *UserRepository_GetAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		run(args[0].(context.Context))
 	})
 	return _c
 }
@@ -72,14 +75,14 @@ func (_c *UserRepository_GetAll_Call) Return(_a0 []domain.User, _a1 error) *User
 	return _c
 }
 
-func (_c *UserRepository_GetAll_Call) RunAndReturn(run func() ([]domain.User, error)) *UserRepository_GetAll_Call {
+func (_c *UserRepository_GetAll_Call) RunAndReturn(run func(context.Context) ([]domain.User, error)) *UserRepository_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// GetByID provides a mock function with given fields: id
-func (_m *UserRepository) GetByID(id int64) (*domain.User, error) {
-	ret := _m.Called(id)
+// GetByID provides a mock function with given fields: ctx, id
+func (_m *UserRepository) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByID")
@@ -87,19 +90,19 @@ func (_m *UserRepository) GetByID(id int64) (*domain.User, error) {
 
 	var r0 *domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) (*domain.User, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) (*domain.User, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(int64) *domain.User); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, int64) *domain.User); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -113,14 +116,15 @@ type UserRepository_GetByID_Call struct {
 }
 
 // GetByID is a helper method to define mock.On call
+//   - ctx context.Context
 //   - id int64
-func (_e *UserRepository_Expecter) GetByID(id interface{}) *UserRepository_GetByID_Call {
-	return &UserRepository_GetByID_Call{Call: _e.mock.On("GetByID", id)}
+func (_e *UserRepository_Expecter) GetByID(ctx interface{}, id interface{}) *UserRepository_GetByID_Call {
+	return &UserRepository_GetByID_Call{Call: _e.mock.On("GetByID", ctx, id)}
 }
 
-func (_c *UserRepository_GetByID_Call) Run(run func(id int64)) *UserRepository_GetByID_Call {
+func (_c *UserRepository_GetByID_Call) Run(run func(ctx context.Context, id int64)) *UserRepository_GetByID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(int64))
+		run(args[0].(context.Context), args[1].(int64))
 	})
 	return _c
 }
@@ -130,14 +134,73 @@ func (_c *UserRepository_GetByID_Call) Return(_a0 *domain.User, _a1 error) *User
 	return _c
 }
 
-func (_c *UserRepository_GetByID_Call) RunAndReturn(run func(int64) (*domain.User, error)) *UserRepository_GetByID_Call {
+func (_c *UserRepository_GetByID_Call) RunAndReturn(run func(context.Context, int64) (*domain.User, error)) *UserRepository_GetByID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// Save provides a mock function with given fields: user
-func (_m *UserRepository) Save(user *domain.User) (*domain.User, error) {
-	ret := _m.Called(user)
+// GetUserByEmail provides a mock function with given fields: ctx, email
+func (_m *UserRepository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {
+	ret := _m.Called(ctx, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByEmail")
+	}
+
+	var r0 *domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*domain.User, error)); ok {
+		return rf(ctx, email)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *domain.User); ok {
+		r0 = rf(ctx, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UserRepository_GetUserByEmail_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByEmail'
+type UserRepository_GetUserByEmail_Call struct {
+	*mock.Call
+}
+
+// GetUserByEmail is a helper method to define mock.On call
+//   - ctx context.Context
+//   - email string
+func (_e *UserRepository_Expecter) GetUserByEmail(ctx interface{}, email interface{}) *UserRepository_GetUserByEmail_Call {
+	return &UserRepository_GetUserByEmail_Call{Call: _e.mock.On("GetUserByEmail", ctx, email)}
+}
+
+func (_c *UserRepository_GetUserByEmail_Call) Run(run func(ctx context.Context, email string)) *UserRepository_GetUserByEmail_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *UserRepository_GetUserByEmail_Call) Return(_a0 *domain.User, _a1 error) *UserRepository_GetUserByEmail_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *UserRepository_GetUserByEmail_Call) RunAndReturn(run func(context.Context, string) (*domain.User, error)) *UserRepository_GetUserByEmail_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Save provides a mock function with given fields: ctx, user
+func (_m *UserRepository) Save(ctx context.Context, user *domain.User) (*domain.User, error) {
+	ret := _m.Called(ctx, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Save")
@@ -145,19 +208,19 @@ func (_m *UserRepository) Save(user *domain.User) (*domain.User, error) {
 
 	var r0 *domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*domain.User) (*domain.User, error)); ok {
-		return rf(user)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.User) (*domain.User, error)); ok {
+		return rf(ctx, user)
 	}
-	if rf, ok := ret.Get(0).(func(*domain.User) *domain.User); ok {
-		r0 = rf(user)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.User) *domain.User); ok {
+		r0 = rf(ctx, user)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*domain.User) error); ok {
-		r1 = rf(user)
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.User) error); ok {
+		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -171,14 +234,15 @@ type UserRepository_Save_Call struct {
 }
 
 // Save is a helper method to define mock.On call
+//   - ctx context.Context
 //   - user *domain.User
-func (_e *UserRepository_Expecter) Save(user interface{}) *UserRepository_Save_Call {
-	return &UserRepository_Save_Call{Call: _e.mock.On("Save", user)}
+func (_e *UserRepository_Expecter) Save(ctx interface{}, user interface{}) *UserRepository_Save_Call {
+	return &UserRepository_Save_Call{Call: _e.mock.On("Save", ctx, user)}
 }
 
-func (_c *UserRepository_Save_Call) Run(run func(user *domain.User)) *UserRepository_Save_Call {
+func (_c *UserRepository_Save_Call) Run(run func(ctx context.Context, user *domain.User)) *UserRepository_Save_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*domain.User))
+		run(args[0].(context.Context), args[1].(*domain.User))
 	})
 	return _c
 }
@@ -188,7 +252,7 @@ func (_c *UserRepository_Save_Call) Return(_a0 *domain.User, _a1 error) *UserRep
 	return _c
 }
 
-func (_c *UserRepository_Save_Call) RunAndReturn(run func(*domain.User) (*domain.User, error)) *UserRepository_Save_Call {
+func (_c *UserRepository_Save_Call) RunAndReturn(run func(context.Context, *domain.User) (*domain.User, error)) *UserRepository_Save_Call {
 	_c.Call.Return(run)
 	return _c
 }

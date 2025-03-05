@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/nicewook/gocore/internal/domain"
 )
 
@@ -12,17 +14,10 @@ func NewUserUseCase(userRepo domain.UserRepository) domain.UserUseCase {
 	return &userUseCase{userRepo: userRepo}
 }
 
-func (uc *userUseCase) CreateUser(user *domain.User) (*domain.User, error) {
-	if user.Name == "" || user.Email == "" {
-		return nil, domain.ErrInvalidInput
-	}
-	return uc.userRepo.Save(user)
+func (uc *userUseCase) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+	return uc.userRepo.GetByID(ctx, id)
 }
 
-func (uc *userUseCase) GetByID(id int64) (*domain.User, error) {
-	return uc.userRepo.GetByID(id)
-}
-
-func (uc *userUseCase) GetAll() ([]domain.User, error) {
-	return uc.userRepo.GetAll()
+func (uc *userUseCase) GetAll(ctx context.Context) ([]domain.User, error) {
+	return uc.userRepo.GetAll(ctx)
 }

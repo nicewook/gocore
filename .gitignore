@@ -1,2 +1,36 @@
+# IDE 관련 파일
 .idea/
+.vscode/
+*.swp
+*.swo
+
+# OS 관련 파일
 .DS_Store
+Thumbs.db
+
+# 바이너리 파일
+/gocore
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 테스트 바이너리, 빌드된 파일, 로그 파일
+*.test
+*.out
+*.log
+
+# 의존성 디렉토리 (필요한 경우)
+/vendor/
+
+# 환경 변수 파일
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 기타 임시 파일
+/tmp/
+/temp/

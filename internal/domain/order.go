@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type Order struct {
 	ID              int64  `json:"id"`
 	UserID          int64  `json:"user_id"`
@@ -10,13 +12,13 @@ type Order struct {
 }
 
 type OrderRepository interface {
-	Save(order *Order) (*Order, error)
-	GetByID(id int64) (*Order, error)
-	GetAll() ([]Order, error)
+	Save(ctx context.Context, order *Order) (*Order, error)
+	GetByID(ctx context.Context, id int64) (*Order, error)
+	GetAll(ctx context.Context) ([]Order, error)
 }
 
 type OrderUseCase interface {
-	CreateOrder(order *Order) (*Order, error)
-	GetByID(id int64) (*Order, error)
-	GetAll() ([]Order, error)
+	CreateOrder(ctx context.Context, order *Order) (*Order, error)
+	GetByID(ctx context.Context, id int64) (*Order, error)
+	GetAll(ctx context.Context) ([]Order, error)
 }
