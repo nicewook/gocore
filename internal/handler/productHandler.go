@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/nicewook/gocore/internal/domain"
+	"github.com/nicewook/gocore/internal/middlewares"
 )
 
 type ProductHandler struct {
@@ -18,9 +19,9 @@ func NewProductHandler(e *echo.Echo, productUseCase domain.ProductUseCase) *Prod
 	handler := &ProductHandler{productUseCase: productUseCase}
 
 	group := e.Group("/products")
-	group.POST("", handler.CreateProduct)
-	group.GET("", handler.GetAll)
-	group.GET("/:id", handler.GetByID)
+	group.POST("", handler.CreateProduct, middlewares.AllowRoles(domain.RoleAdmin, domain.RoleManager))
+	group.GET("", handler.GetAll, middlewares.AllowRoles(domain.RolePublic))
+	group.GET("/:id", handler.GetByID, middlewares.AllowRoles(domain.RolePublic))
 
 	return handler
 }

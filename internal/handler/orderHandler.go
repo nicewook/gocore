@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/nicewook/gocore/internal/domain"
+	"github.com/nicewook/gocore/internal/middlewares"
 )
 
 type OrderHandler struct {
@@ -18,9 +19,9 @@ func NewOrderHandler(e *echo.Echo, orderUseCase domain.OrderUseCase) *OrderHandl
 	handler := &OrderHandler{orderUseCase: orderUseCase}
 
 	group := e.Group("/orders")
-	group.POST("", handler.CreateOrder)
-	group.GET("", handler.GetAll)
-	group.GET("/:id", handler.GetByID)
+	group.POST("", handler.CreateOrder, middlewares.AllowRoles(domain.RoleAdmin, domain.RoleManager, domain.RoleUser))
+	group.GET("", handler.GetAll, middlewares.AllowRoles(domain.RoleAdmin, domain.RoleManager))
+	group.GET("/:id", handler.GetByID, middlewares.AllowRoles(domain.RoleAdmin, domain.RoleManager, domain.RoleUser))
 
 	return handler
 }
