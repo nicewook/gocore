@@ -17,9 +17,13 @@ import (
 
 	"github.com/nicewook/gocore/internal/config"
 	"github.com/nicewook/gocore/pkg/contextutil"
+	"github.com/nicewook/gocore/pkg/validatorutil"
 )
 
 func RegisterMiddlewares(cfg *config.Config, logger *slog.Logger, e *echo.Echo) {
+
+	// ✅ Validator: 요청 바인딩 및 유효성 검사
+	e.Validator = validatorutil.NewValidator()
 
 	// ✅ Trailing Slash 제거 및 301 리디렉트 설정
 	e.Pre(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
