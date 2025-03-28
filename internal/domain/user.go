@@ -15,9 +15,9 @@ const (
 
 type User struct {
 	ID       int64    `json:"id"`
-	Name     string   `json:"name"`
-	Email    string   `json:"email"`
-	Password string   `json:"-"`
+	Name     string   `json:"name" validate:"omitempty,min=2,max=100"`
+	Email    string   `json:"email" validate:"required,email"`
+	Password string   `json:"-" validate:"required,min=8"`
 	Roles    []string `json:"roles"`
 }
 

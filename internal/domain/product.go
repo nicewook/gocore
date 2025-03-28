@@ -4,8 +4,8 @@ import "context"
 
 type Product struct {
 	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	PriceInKRW int64  `json:"price_in_krw"`
+	Name       string `json:"name" validate:"required,min=2,max=100"`
+	PriceInKRW int64  `json:"price_in_krw" validate:"required,gt=0"`
 }
 
 type ProductRepository interface {

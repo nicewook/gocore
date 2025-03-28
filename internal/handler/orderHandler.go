@@ -27,25 +27,31 @@ func NewOrderHandler(e *echo.Echo, orderUseCase domain.OrderUseCase) *OrderHandl
 }
 
 func (h *OrderHandler) CreateOrder(c echo.Context) error {
-	var order domain.Order
-	if err := c.Bind(&order); err != nil {
+	// 주문 데이터 바인딩
+	order := new(domain.Order)
+	if err := c.Bind(order); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
-	if order.UserID <= 0 || order.ProductID <= 0 || order.Quantity <= 0 || order.TotalPriceInKRW <= 0 {
+	// 입력값 검증
+	if err := c.Validate(order); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
 	ctx := c.Request().Context()
-	createdOrder, err := h.orderUseCase.CreateOrder(ctx, &order)
+
+	// 주문 생성 처리
+	createdOrder, err := h.orderUseCase.CreateOrder(ctx, order)
 	if err == nil {
 		return c.JSON(http.StatusCreated, createdOrder)
 	}
+
+	// 에러 처리
 	switch {
 	case errors.Is(err, domain.ErrInvalidInput):
 		return c.JSON(http.StatusBadRequest, ErrResponse(err))
-	case errors.Is(err, domain.ErrAlreadyExists):
-		return c.JSON(http.StatusConflict, ErrResponse(err))
+	case errors.Is(err, domain.ErrNotFound):
+		return c.JSON(http.StatusNotFound, ErrResponse(err))
 	default:
 		return c.JSON(http.StatusInternalServerError, ErrResponse(domain.ErrInternal))
 	}
@@ -78,7 +84,6 @@ func (h *OrderHandler) GetAll(c echo.Context) error {
 		return c.JSON(http.StatusOK, orders)
 	}
 	switch {
-
 	case errors.Is(err, domain.ErrNotFound):
 		return c.JSON(http.StatusNotFound, ErrResponse(domain.ErrNotFound))
 	default:

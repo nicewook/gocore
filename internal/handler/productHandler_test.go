@@ -13,6 +13,7 @@ import (
 
 	"github.com/nicewook/gocore/internal/domain"
 	"github.com/nicewook/gocore/internal/domain/mocks"
+	"github.com/nicewook/gocore/pkg/validatorutil"
 )
 
 func TestCreateProduct(t *testing.T) {
@@ -37,7 +38,7 @@ func TestCreateProduct(t *testing.T) {
 		{
 			name:           "InvalidInput",
 			input:          `{"name":"","price_in_krw":0}`,
-			mockInput:      &domain.Product{Name: "", PriceInKRW: 0},
+			mockInput:      nil, // 유효성 검사 실패로 usecase까지 호출되지 않음
 			mockReturn:     nil,
 			mockError:      nil,
 			expectedStatus: http.StatusBadRequest,
@@ -83,12 +84,14 @@ func TestCreateProduct(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
+			e.Validator = validatorutil.NewValidator()
+
 			req := httptest.NewRequest(http.MethodPost, "/products", strings.NewReader(tt.input))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			mockUseCase := new(mocks.ProductUseCase)
-			if tt.mockInput != nil {
+			if tt.mockInput != nil && tt.name != "InvalidInput" {
 				mockUseCase.On("CreateProduct", mock.Anything, tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
 			}
 			handler := NewProductHandler(e, mockUseCase)
@@ -143,6 +146,8 @@ func TestGetProductByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
+			e.Validator = validatorutil.NewValidator()
+
 			req := httptest.NewRequest(http.MethodGet, "/products/"+tt.pathParam, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -189,6 +194,8 @@ func TestGetAllProducts(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
+			e.Validator = validatorutil.NewValidator()
+
 			req := httptest.NewRequest(http.MethodGet, "/products", nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)

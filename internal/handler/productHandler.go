@@ -31,7 +31,8 @@ func (h *ProductHandler) CreateProduct(c echo.Context) error {
 	if err := c.Bind(&product); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
-	if product.Name == "" || product.PriceInKRW <= 0 {
+
+	if err := c.Validate(product); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 

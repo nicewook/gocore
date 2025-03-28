@@ -13,6 +13,7 @@ import (
 
 	"github.com/nicewook/gocore/internal/domain"
 	"github.com/nicewook/gocore/internal/domain/mocks"
+	"github.com/nicewook/gocore/pkg/validatorutil"
 )
 
 func TestCreateOrder(t *testing.T) {
@@ -37,7 +38,7 @@ func TestCreateOrder(t *testing.T) {
 		{
 			name:           "InvalidInput",
 			input:          `{"user_id":0,"product_id":0,"quantity":0,"total_price_in_krw":0}`,
-			mockInput:      &domain.Order{UserID: 0, ProductID: 0, Quantity: 0, TotalPriceInKRW: 0},
+			mockInput:      nil, // 유효성 검사 실패로 usecase까지 호출되지 않음
 			mockReturn:     nil,
 			mockError:      nil,
 			expectedStatus: http.StatusBadRequest,
@@ -53,13 +54,13 @@ func TestCreateOrder(t *testing.T) {
 			expectedBody:   `{"error":"invalid input"}`,
 		},
 		{
-			name:           "AlreadyExists",
+			name:           "NotFound",
 			input:          `{"user_id":1,"product_id":1,"quantity":2,"total_price_in_krw":2000}`,
 			mockInput:      &domain.Order{UserID: 1, ProductID: 1, Quantity: 2, TotalPriceInKRW: 2000},
 			mockReturn:     nil,
-			mockError:      domain.ErrAlreadyExists,
-			expectedStatus: http.StatusConflict,
-			expectedBody:   `{"error":"already exists"}`,
+			mockError:      domain.ErrNotFound,
+			expectedStatus: http.StatusNotFound,
+			expectedBody:   `{"error":"not found"}`,
 		},
 		{
 			name:           "InternalError",
@@ -82,19 +83,24 @@ func TestCreateOrder(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
+			// Echo 인스턴스 생성 및 유효성 검사기 설정
 			e := echo.New()
+			e.Validator = validatorutil.NewValidator()
+
+			// 요청 생성
 			req := httptest.NewRequest(http.MethodPost, "/orders", strings.NewReader(tt.input))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
+			// Mock UseCase 설정
 			mockUseCase := new(mocks.OrderUseCase)
-			if tt.mockInput != nil {
+			if tt.mockInput != nil && tt.name != "InvalidInput" {
 				mockUseCase.On("CreateOrder", mock.Anything, tt.mockInput).Return(tt.mockReturn, tt.mockError).Maybe()
 			}
 			handler := NewOrderHandler(e, mockUseCase)
 
+			// 핸들러 호출
 			err := handler.CreateOrder(c)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expectedStatus, rec.Code)
@@ -146,6 +152,8 @@ func TestGetOrderByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
+			e.Validator = validatorutil.NewValidator()
+
 			req := httptest.NewRequest(http.MethodGet, "/orders/"+tt.pathParam, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -199,6 +207,8 @@ func TestGetAllOrders(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
+			e.Validator = validatorutil.NewValidator()
+
 			req := httptest.NewRequest(http.MethodGet, "/orders", nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
