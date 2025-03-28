@@ -64,19 +64,45 @@ func (h *UserHandler) GetAll(c echo.Context) error {
 	logger := contextutil.GetLogger(c.Request().Context())
 	logger.Info("UserHandler:GetAll")
 
-	// Authorization 헤더 확인
+	// Parse query parameters and bind to request struct
+	req := new(domain.GetAllRequest)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
+	}
+
+	// Validate request parameters
+	if err := c.Validate(req); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
+	}
+
+	// Set default values if not provided
+	if req.Limit == 0 {
+		req.Limit = 10 // Default limit
+	}
+
+	// Authorization 헤더 확인 (로깅 목적)
 	authHeader := c.Request().Header.Get("Authorization")
 	logger.Debug("Authorization header", "value", authHeader)
 
 	ctx := c.Request().Context()
-	// 인증 없이도 사용자 목록 반환
-	users, err := h.userUseCase.GetAll(ctx)
+
+	// 통합된 GetAll 메서드 호출 (페이지네이션 정보 포함)
+	response, err := h.userUseCase.GetAll(ctx, req)
 	if err == nil {
-		return c.JSON(http.StatusOK, users)
+		return c.JSON(http.StatusOK, response)
 	}
+
 	switch {
 	case errors.Is(err, domain.ErrNotFound):
-		return c.JSON(http.StatusNotFound, ErrResponse(err))
+		// 사용자를 찾지 못한 경우 빈 배열과 함께 페이지네이션 정보 반환
+		emptyResponse := &domain.GetAllResponse{
+			Users:      []domain.User{},
+			TotalCount: 0,
+			Offset:     req.Offset,
+			Limit:      req.Limit,
+			HasMore:    false,
+		}
+		return c.JSON(http.StatusOK, emptyResponse)
 	default:
 		return c.JSON(http.StatusInternalServerError, ErrResponse(domain.ErrInternal))
 	}

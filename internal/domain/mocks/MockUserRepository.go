@@ -22,29 +22,29 @@ func (_m *UserRepository) EXPECT() *UserRepository_Expecter {
 	return &UserRepository_Expecter{mock: &_m.Mock}
 }
 
-// GetAll provides a mock function with given fields: ctx
-func (_m *UserRepository) GetAll(ctx context.Context) ([]domain.User, error) {
-	ret := _m.Called(ctx)
+// GetAll provides a mock function with given fields: ctx, req
+func (_m *UserRepository) GetAll(ctx context.Context, req *domain.GetAllRequest) (*domain.GetAllResponse, error) {
+	ret := _m.Called(ctx, req)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
 	}
 
-	var r0 []domain.User
+	var r0 *domain.GetAllResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]domain.User, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.GetAllRequest) (*domain.GetAllResponse, error)); ok {
+		return rf(ctx, req)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []domain.User); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.GetAllRequest) *domain.GetAllResponse); ok {
+		r0 = rf(ctx, req)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.User)
+			r0 = ret.Get(0).(*domain.GetAllResponse)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.GetAllRequest) error); ok {
+		r1 = rf(ctx, req)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -59,23 +59,24 @@ type UserRepository_GetAll_Call struct {
 
 // GetAll is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *UserRepository_Expecter) GetAll(ctx interface{}) *UserRepository_GetAll_Call {
-	return &UserRepository_GetAll_Call{Call: _e.mock.On("GetAll", ctx)}
+//   - req *domain.GetAllRequest
+func (_e *UserRepository_Expecter) GetAll(ctx interface{}, req interface{}) *UserRepository_GetAll_Call {
+	return &UserRepository_GetAll_Call{Call: _e.mock.On("GetAll", ctx, req)}
 }
 
-func (_c *UserRepository_GetAll_Call) Run(run func(ctx context.Context)) *UserRepository_GetAll_Call {
+func (_c *UserRepository_GetAll_Call) Run(run func(ctx context.Context, req *domain.GetAllRequest)) *UserRepository_GetAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(*domain.GetAllRequest))
 	})
 	return _c
 }
 
-func (_c *UserRepository_GetAll_Call) Return(_a0 []domain.User, _a1 error) *UserRepository_GetAll_Call {
+func (_c *UserRepository_GetAll_Call) Return(_a0 *domain.GetAllResponse, _a1 error) *UserRepository_GetAll_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *UserRepository_GetAll_Call) RunAndReturn(run func(context.Context) ([]domain.User, error)) *UserRepository_GetAll_Call {
+func (_c *UserRepository_GetAll_Call) RunAndReturn(run func(context.Context, *domain.GetAllRequest) (*domain.GetAllResponse, error)) *UserRepository_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }

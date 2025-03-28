@@ -70,20 +70,93 @@ func TestGetAllUsers(t *testing.T) {
 		repo.Save(ctx, user1)
 		repo.Save(ctx, user2)
 
-		users, err := repo.GetAll(ctx)
+		// 빈 요청으로 모든 사용자 조회
+		req := &domain.GetAllRequest{
+			Limit: 10,
+		}
+		response, err := repo.GetAll(ctx, req)
 		assert.NoError(t, err)
-		assert.Len(t, users, 2)
-		assert.Contains(t, []string{user1.Name, user2.Name}, users[0].Name)
-		assert.Contains(t, []string{user1.Email, user2.Email}, users[0].Email)
-		assert.Contains(t, []string{user1.Name, user2.Name}, users[1].Name)
-		assert.Contains(t, []string{user1.Email, user2.Email}, users[1].Email)
+		assert.NotNil(t, response)
+		assert.Len(t, response.Users, 2)
+		assert.Equal(t, int64(2), response.TotalCount)
+		assert.Equal(t, 0, response.Offset)
+		assert.Equal(t, 10, response.Limit)
+		assert.False(t, response.HasMore)
+
+		// 사용자 데이터 확인
+		userNames := []string{response.Users[0].Name, response.Users[1].Name}
+		userEmails := []string{response.Users[0].Email, response.Users[1].Email}
+		assert.Contains(t, userNames, "User1")
+		assert.Contains(t, userNames, "User2")
+		assert.Contains(t, userEmails, "user1@example.com")
+		assert.Contains(t, userEmails, "user2@example.com")
 	})
 
-	t.Run("사용자가 없을 때 빈 배열 반환", func(t *testing.T) {
+	t.Run("필터링 기능 테스트", func(t *testing.T) {
 		cleanDB(t, "users") // 데이터 초기화
-		users, err := repo.GetAll(ctx)
+
+		// 테스트 데이터 생성
+		user1 := &domain.User{Name: "John Doe", Email: "john@example.com", Roles: []string{domain.RoleUser}}
+		user2 := &domain.User{Name: "Jane Smith", Email: "jane@example.com", Roles: []string{domain.RoleManager}}
+		user3 := &domain.User{Name: "Admin User", Email: "admin@example.com", Roles: []string{domain.RoleAdmin}}
+
+		repo.Save(ctx, user1)
+		repo.Save(ctx, user2)
+		repo.Save(ctx, user3)
+
+		// 이름으로 필터링
+		nameReq := &domain.GetAllRequest{
+			Name:  "John",
+			Limit: 10,
+		}
+		nameResponse, err := repo.GetAll(ctx, nameReq)
 		assert.NoError(t, err)
-		assert.Len(t, users, 0)
+		assert.Len(t, nameResponse.Users, 1)
+		assert.Equal(t, "John Doe", nameResponse.Users[0].Name)
+
+		// 이메일로 필터링
+		emailReq := &domain.GetAllRequest{
+			Email: "admin",
+			Limit: 10,
+		}
+		emailResponse, err := repo.GetAll(ctx, emailReq)
+		assert.NoError(t, err)
+		assert.Len(t, emailResponse.Users, 1)
+		assert.Equal(t, "admin@example.com", emailResponse.Users[0].Email)
+
+		// 페이지네이션 테스트
+		pageReq := &domain.GetAllRequest{
+			Offset: 0,
+			Limit:  2,
+		}
+		pageResponse, err := repo.GetAll(ctx, pageReq)
+		assert.NoError(t, err)
+		assert.Len(t, pageResponse.Users, 2)
+		assert.Equal(t, int64(3), pageResponse.TotalCount)
+		assert.True(t, pageResponse.HasMore)
+
+		// 두 번째 페이지
+		page2Req := &domain.GetAllRequest{
+			Offset: 2,
+			Limit:  2,
+		}
+		page2Response, err := repo.GetAll(ctx, page2Req)
+		assert.NoError(t, err)
+		assert.Len(t, page2Response.Users, 1)
+		assert.Equal(t, int64(3), page2Response.TotalCount)
+		assert.False(t, page2Response.HasMore)
+	})
+
+	t.Run("사용자가 없을 때 에러 반환", func(t *testing.T) {
+		cleanDB(t, "users") // 데이터 초기화
+
+		req := &domain.GetAllRequest{
+			Limit: 10,
+		}
+		response, err := repo.GetAll(ctx, req)
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, domain.ErrNotFound)
+		assert.Nil(t, response)
 	})
 }
 
