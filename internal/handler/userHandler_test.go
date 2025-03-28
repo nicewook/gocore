@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/labstack/echo/v4"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/nicewook/gocore/internal/domain"
 	"github.com/nicewook/gocore/internal/domain/mocks"
+	"github.com/nicewook/gocore/pkg/validatorutil"
 )
 
 func TestErrResponse(t *testing.T) {
@@ -59,6 +61,10 @@ func TestGetByID(t *testing.T) {
 	userRoles := []string{domain.RoleUser}
 	adminRoles := []string{domain.RoleAdmin, domain.RoleUser}
 
+	// Setup validator for testing
+	e := echo.New()
+	e.Validator = validatorutil.NewValidator()
+
 	tests := []struct {
 		name           string
 		pathParam      string
@@ -95,7 +101,15 @@ func TestGetByID(t *testing.T) {
 			name:           "Invalid ID format",
 			pathParam:      "invalid",
 			mockReturn:     nil,
-			mockError:      domain.ErrInvalidInput,
+			mockError:      nil, // Error will be caught by validation
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   fmt.Sprintf(`{"error":"%s"}`, domain.ErrInvalidInput.Error()),
+		},
+		{
+			name:           "Negative ID",
+			pathParam:      "-1",
+			mockReturn:     nil,
+			mockError:      nil, // Error will be caught by validation
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"error":"%s"}`, domain.ErrInvalidInput.Error()),
 		},
@@ -104,16 +118,21 @@ func TestGetByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// echo context 생성
-			e := echo.New()
 			req := httptest.NewRequest(http.MethodGet, "/users/"+tt.pathParam, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetParamNames("id")
 			c.SetParamValues(tt.pathParam)
 
-			// mcok 생성, 설정 및 핸들러 생성
+			// mock 생성, 설정 및 핸들러 생성
 			mockUseCase := new(mocks.UserUseCase)
-			mockUseCase.On("GetByID", mock.Anything, mock.Anything).Return(tt.mockReturn, tt.mockError).Maybe()
+
+			// Only set up the mock expectation for valid IDs that will pass validation
+			if tt.pathParam != "invalid" && tt.pathParam != "-1" {
+				id, _ := strconv.ParseInt(tt.pathParam, 10, 64)
+				mockUseCase.On("GetByID", mock.Anything, id).Return(tt.mockReturn, tt.mockError)
+			}
+
 			handler := NewUserHandler(e, mockUseCase)
 
 			// 핸들러 실행 및 검증

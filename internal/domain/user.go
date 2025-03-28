@@ -13,6 +13,11 @@ const (
 	RoleUser    = "User"
 )
 
+// GetByIDRequest represents a request to get a user by ID
+type GetByIDRequest struct {
+	ID int64 `param:"id" validate:"required,min=1"`
+}
+
 type User struct {
 	ID       int64    `json:"id"`
 	Name     string   `json:"name" validate:"omitempty,min=2,max=100"`
