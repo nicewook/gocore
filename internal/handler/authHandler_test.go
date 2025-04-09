@@ -437,6 +437,12 @@ func TestSignUpRequestValidation(t *testing.T) {
 			expectedCode:  http.StatusBadRequest,
 			expectedError: true,
 		},
+		{
+			name:          "Restricted Email Domain - Hotmail",
+			requestBody:   `{"email":"test@hotmail.com","password":"password123"}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
 	}
 
 	for _, tt := range tests {

@@ -45,7 +45,7 @@ func (h *AuthHandler) SignUpUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
-	if err := c.Validate(req); err != nil {
+	if err := req.Validate(c); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
 
