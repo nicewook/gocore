@@ -18,8 +18,8 @@ type GetByIDRequest struct {
 	ID int64 `param:"id" validate:"required,min=1"`
 }
 
-// GetAllRequest represents a request to get all users with filtering and pagination
-type GetAllRequest struct {
+// GetAllUsersRequest represents a request to get all users with filtering and pagination
+type GetAllUsersRequest struct {
 	Offset int    `query:"offset" validate:"omitempty,min=0"`
 	Limit  int    `query:"limit" validate:"omitempty,min=1,max=100"`
 	Name   string `query:"name" validate:"omitempty,max=100"`
@@ -28,7 +28,7 @@ type GetAllRequest struct {
 }
 
 // GetRolesArray converts the comma-separated roles string to a slice
-func (r *GetAllRequest) GetRolesArray() []string {
+func (r *GetAllUsersRequest) GetRolesArray() []string {
 	if r.Roles == "" {
 		return nil
 	}
@@ -88,11 +88,11 @@ func (u *User) IsManager() bool {
 type UserRepository interface {
 	Save(ctx context.Context, user *User) (*User, error)
 	GetByID(ctx context.Context, id int64) (*User, error)
-	GetAll(ctx context.Context, req *GetAllRequest) (*GetAllResponse, error)
+	GetAll(ctx context.Context, req *GetAllUsersRequest) (*GetAllResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 }
 
 type UserUseCase interface {
 	GetByID(ctx context.Context, id int64) (*User, error)
-	GetAll(ctx context.Context, req *GetAllRequest) (*GetAllResponse, error)
+	GetAll(ctx context.Context, req *GetAllUsersRequest) (*GetAllResponse, error)
 }

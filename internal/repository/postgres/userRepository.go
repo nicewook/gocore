@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/Masterminds/squirrel"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 
@@ -66,18 +66,58 @@ func (r *userRepository) GetByID(ctx context.Context, id int64) (*domain.User, e
 	return &user, nil
 }
 
-func (r *userRepository) GetAll(ctx context.Context, req *domain.GetAllRequest) (*domain.GetAllResponse, error) {
-	// Squirrel PostgreSQL 쿼리 빌더 초기화
-	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+func likeCondition(key string, value interface{}) sq.Like {
+	if value == nil || value == "" {
+		return nil
+	}
+	return sq.Like{
+		key: fmt.Sprintf("%%%s%%", value),
+	}
+}
 
-	// 기본 사용자 데이터 쿼리와 카운트 쿼리 생성
-	dataBuilder := psql.Select("id", "name", "email", "roles").From("users")
+func equalCondition(key string, value interface{}) sq.Eq {
+	if value == nil {
+		return nil
+	}
+	return sq.Eq{
+		key: value,
+	}
+}
+
+func (r *userRepository) GetAll(ctx context.Context, req *domain.GetAllUsersRequest) (*domain.GetAllResponse, error) {
+
+	// PostgreSQL 스타일의 파라미터 사용을 위한 placeholder 설정
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+
+	// 사용자 데이터 쿼리, 카운트 쿼리 빌더 생성
+	dataBuilder := psql.Select("id", "name", "email", "password", "roles").From("users")
 	countBuilder := psql.Select("COUNT(*)").From("users")
 
 	// 필터 조건 적용
-	dataBuilder, countBuilder = addUserFilters(dataBuilder, countBuilder, req)
+	if req.Name != "" {
+		dataBuilder = dataBuilder.Where(sq.Like{"name": fmt.Sprintf("%%%s%%", req.Name)})
+		countBuilder = countBuilder.Where(sq.Like{"name": fmt.Sprintf("%%%s%%", req.Name)})
+	}
+	if req.Email != "" {
+		dataBuilder = dataBuilder.Where(sq.Like{"email": fmt.Sprintf("%%%s%%", req.Email)})
+		countBuilder = countBuilder.Where(sq.Like{"email": fmt.Sprintf("%%%s%%", req.Email)})
+	}
 
-	// 전체 사용자 수 조회
+	rolesArray := req.GetRolesArray()
+	if len(rolesArray) > 0 {
+		roleConditions := make([]sq.Sqlizer, 0, len(rolesArray))
+		for _, role := range rolesArray {
+			if role != "" {
+				roleConditions = append(roleConditions, sq.Like{"roles": fmt.Sprintf("%%%s%%", role)})
+			}
+		}
+		if len(roleConditions) > 0 {
+			dataBuilder = dataBuilder.Where(sq.Or(roleConditions))
+			countBuilder = countBuilder.Where(sq.Or(roleConditions))
+		}
+	}
+
+	// 카운트 쿼리 실행
 	countSQL, countArgs, err := countBuilder.ToSql()
 	if err != nil {
 		return nil, errors.Wrap(err, "count query 생성 실패")
@@ -88,18 +128,24 @@ func (r *userRepository) GetAll(ctx context.Context, req *domain.GetAllRequest) 
 		return nil, errors.Wrap(err, "사용자 수 조회 실패")
 	}
 
-	// 결과가 없으면 NotFound 에러 반환
 	if totalCount == 0 {
-		return nil, domain.ErrNotFound
+		// 사용자가 없을 때는 빈 배열과 함께 응답 반환
+		return &domain.GetAllResponse{
+			Users:      []domain.User{},
+			TotalCount: 0,
+			Offset:     req.Offset,
+			Limit:      req.Limit,
+			HasMore:    false,
+		}, nil
 	}
 
-	// 페이지네이션 및 정렬 적용
+	// 사용자 데이터 쿼리 페이지네이션 및 정렬 적용
 	dataBuilder = dataBuilder.
 		OrderBy("id ASC").
 		Limit(uint64(req.Limit)).
 		Offset(uint64(req.Offset))
 
-	// 사용자 데이터 조회
+	// 사용자 데이터 쿼리 실행
 	dataSQL, dataArgs, err := dataBuilder.ToSql()
 	if err != nil {
 		return nil, errors.Wrap(err, "data query 생성 실패")
@@ -136,11 +182,13 @@ func scanUsers(rows *sql.Rows) ([]domain.User, error) {
 	for rows.Next() {
 		var user domain.User
 		var rolesStr string
+		var password string
 
-		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &rolesStr); err != nil {
+		if err := rows.Scan(&user.ID, &user.Name, &user.Email, &password, &rolesStr); err != nil {
 			return nil, errors.Wrap(err, "사용자 스캔 실패")
 		}
 
+		user.Password = password
 		user.Roles = domain.StringToRoles(rolesStr)
 		users = append(users, user)
 	}
@@ -150,37 +198,6 @@ func scanUsers(rows *sql.Rows) ([]domain.User, error) {
 	}
 
 	return users, nil
-}
-
-// addUserFilters는 검색 조건을 쿼리 빌더에 추가합니다
-func addUserFilters(dataBuilder, countBuilder squirrel.SelectBuilder, req *domain.GetAllRequest) (squirrel.SelectBuilder, squirrel.SelectBuilder) {
-	// 이름 필터
-	if req.Name != "" {
-		nameFilter := squirrel.ILike{"name": "%" + req.Name + "%"}
-		dataBuilder = dataBuilder.Where(nameFilter)
-		countBuilder = countBuilder.Where(nameFilter)
-	}
-
-	// 이메일 필터
-	if req.Email != "" {
-		emailFilter := squirrel.ILike{"email": "%" + req.Email + "%"}
-		dataBuilder = dataBuilder.Where(emailFilter)
-		countBuilder = countBuilder.Where(emailFilter)
-	}
-
-	// 역할 필터
-	rolesArray := req.GetRolesArray()
-	if len(rolesArray) > 0 {
-		roleConditions := squirrel.Or{}
-		for _, role := range rolesArray {
-			roleConditions = append(roleConditions, squirrel.Like{"roles": "%" + role + "%"})
-		}
-
-		dataBuilder = dataBuilder.Where(roleConditions)
-		countBuilder = countBuilder.Where(roleConditions)
-	}
-
-	return dataBuilder, countBuilder
 }
 
 func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*domain.User, error) {

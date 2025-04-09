@@ -71,7 +71,7 @@ func TestGetAllUsers(t *testing.T) {
 		repo.Save(ctx, user2)
 
 		// 빈 요청으로 모든 사용자 조회
-		req := &domain.GetAllRequest{
+		req := &domain.GetAllUsersRequest{
 			Limit: 10,
 		}
 		response, err := repo.GetAll(ctx, req)
@@ -105,7 +105,7 @@ func TestGetAllUsers(t *testing.T) {
 		repo.Save(ctx, user3)
 
 		// 이름으로 필터링
-		nameReq := &domain.GetAllRequest{
+		nameReq := &domain.GetAllUsersRequest{
 			Name:  "John",
 			Limit: 10,
 		}
@@ -115,7 +115,7 @@ func TestGetAllUsers(t *testing.T) {
 		assert.Equal(t, "John Doe", nameResponse.Users[0].Name)
 
 		// 이메일로 필터링
-		emailReq := &domain.GetAllRequest{
+		emailReq := &domain.GetAllUsersRequest{
 			Email: "admin",
 			Limit: 10,
 		}
@@ -125,7 +125,7 @@ func TestGetAllUsers(t *testing.T) {
 		assert.Equal(t, "admin@example.com", emailResponse.Users[0].Email)
 
 		// 페이지네이션 테스트
-		pageReq := &domain.GetAllRequest{
+		pageReq := &domain.GetAllUsersRequest{
 			Offset: 0,
 			Limit:  2,
 		}
@@ -136,7 +136,7 @@ func TestGetAllUsers(t *testing.T) {
 		assert.True(t, pageResponse.HasMore)
 
 		// 두 번째 페이지
-		page2Req := &domain.GetAllRequest{
+		page2Req := &domain.GetAllUsersRequest{
 			Offset: 2,
 			Limit:  2,
 		}
@@ -147,16 +147,20 @@ func TestGetAllUsers(t *testing.T) {
 		assert.False(t, page2Response.HasMore)
 	})
 
-	t.Run("사용자가 없을 때 에러 반환", func(t *testing.T) {
+	t.Run("사용자가 없을 때 빈 결과 반환", func(t *testing.T) {
 		cleanDB(t, "users") // 데이터 초기화
 
-		req := &domain.GetAllRequest{
+		req := &domain.GetAllUsersRequest{
 			Limit: 10,
 		}
 		response, err := repo.GetAll(ctx, req)
-		assert.Error(t, err)
-		assert.ErrorIs(t, err, domain.ErrNotFound)
-		assert.Nil(t, response)
+		assert.NoError(t, err)
+		assert.NotNil(t, response)
+		assert.Empty(t, response.Users)
+		assert.Equal(t, int64(0), response.TotalCount)
+		assert.Equal(t, 0, response.Offset)
+		assert.Equal(t, 10, response.Limit)
+		assert.False(t, response.HasMore)
 	})
 }
 

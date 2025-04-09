@@ -189,7 +189,7 @@ func TestGetAll(t *testing.T) {
 	tests := []struct {
 		name           string
 		queryParams    map[string]string
-		mockParams     *domain.GetAllRequest
+		mockParams     *domain.GetAllUsersRequest
 		mockReturn     *domain.GetAllResponse
 		mockError      error
 		expectedStatus int
@@ -198,7 +198,7 @@ func TestGetAll(t *testing.T) {
 		{
 			name:        "Get all users successfully",
 			queryParams: map[string]string{},
-			mockParams:  &domain.GetAllRequest{Limit: 10},
+			mockParams:  &domain.GetAllUsersRequest{Limit: 10},
 			mockReturn: &domain.GetAllResponse{
 				Users:      allUsers,
 				TotalCount: int64(len(allUsers)),
@@ -225,7 +225,7 @@ func TestGetAll(t *testing.T) {
 			queryParams: map[string]string{
 				"name": "John",
 			},
-			mockParams: &domain.GetAllRequest{
+			mockParams: &domain.GetAllUsersRequest{
 				Name:  "John",
 				Limit: 10,
 			},
@@ -253,7 +253,7 @@ func TestGetAll(t *testing.T) {
 			queryParams: map[string]string{
 				"email": "admin",
 			},
-			mockParams: &domain.GetAllRequest{
+			mockParams: &domain.GetAllUsersRequest{
 				Email: "admin",
 				Limit: 10,
 			},
@@ -281,7 +281,7 @@ func TestGetAll(t *testing.T) {
 			queryParams: map[string]string{
 				"roles": "Manager",
 			},
-			mockParams: &domain.GetAllRequest{
+			mockParams: &domain.GetAllUsersRequest{
 				Roles: "Manager",
 				Limit: 10,
 			},
@@ -310,7 +310,7 @@ func TestGetAll(t *testing.T) {
 				"offset": "0",
 				"limit":  "2",
 			},
-			mockParams: &domain.GetAllRequest{
+			mockParams: &domain.GetAllUsersRequest{
 				Offset: 0,
 				Limit:  2,
 			},
@@ -340,7 +340,7 @@ func TestGetAll(t *testing.T) {
 				"offset": "2", // 3번째 항목부터 (0-indexed)
 				"limit":  "2",
 			},
-			mockParams: &domain.GetAllRequest{
+			mockParams: &domain.GetAllUsersRequest{
 				Offset: 2,
 				Limit:  2,
 			},
@@ -379,7 +379,7 @@ func TestGetAll(t *testing.T) {
 			queryParams: map[string]string{
 				"name": "NonExistentUser",
 			},
-			mockParams: &domain.GetAllRequest{
+			mockParams: &domain.GetAllUsersRequest{
 				Name:  "NonExistentUser",
 				Limit: 10,
 			},
@@ -419,7 +419,7 @@ func TestGetAll(t *testing.T) {
 			// 유효성 검사 오류가 예상되는 경우 mock 설정을 하지 않음
 			if tt.mockParams != nil {
 				// Use mock.MatchedBy to verify the request parameters
-				mockUseCase.On("GetAll", mock.Anything, mock.MatchedBy(func(req *domain.GetAllRequest) bool {
+				mockUseCase.On("GetAll", mock.Anything, mock.MatchedBy(func(req *domain.GetAllUsersRequest) bool {
 					reqParam := tt.mockParams
 					return req.Name == reqParam.Name &&
 						req.Email == reqParam.Email &&

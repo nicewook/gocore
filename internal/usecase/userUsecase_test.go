@@ -75,7 +75,7 @@ func TestUserGetAll(t *testing.T) {
 			HasMore:    false,
 		}
 
-		req := &domain.GetAllRequest{
+		req := &domain.GetAllUsersRequest{
 			Limit: 10,
 		}
 
@@ -110,7 +110,7 @@ func TestUserGetAll(t *testing.T) {
 		}
 
 		// 이름 필터링 요청
-		nameReq := &domain.GetAllRequest{
+		nameReq := &domain.GetAllUsersRequest{
 			Name:  "John",
 			Limit: 10,
 		}
@@ -145,7 +145,7 @@ func TestUserGetAll(t *testing.T) {
 			HasMore:    true,
 		}
 
-		req := &domain.GetAllRequest{
+		req := &domain.GetAllUsersRequest{
 			Offset: 0,
 			Limit:  2,
 		}
@@ -171,7 +171,7 @@ func TestUserGetAll(t *testing.T) {
 		repo := new(mocks.UserRepository)
 		useCase := NewUserUseCase(repo)
 
-		req := &domain.GetAllRequest{
+		req := &domain.GetAllUsersRequest{
 			Limit: 10,
 		}
 

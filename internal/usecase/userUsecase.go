@@ -18,7 +18,7 @@ func (uc *userUseCase) GetByID(ctx context.Context, id int64) (*domain.User, err
 	return uc.userRepo.GetByID(ctx, id)
 }
 
-func (uc *userUseCase) GetAll(ctx context.Context, req *domain.GetAllRequest) (*domain.GetAllResponse, error) {
+func (uc *userUseCase) GetAll(ctx context.Context, req *domain.GetAllUsersRequest) (*domain.GetAllResponse, error) {
 	// usecase 레이어에서 추가적인 비즈니스 로직이 필요할 경우 여기에 구현
 	// 예: 특정 권한에 따른 필터링, 데이터 검증, 복잡한 비즈니스 룰 적용 등
 

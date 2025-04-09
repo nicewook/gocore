@@ -65,7 +65,7 @@ func (h *UserHandler) GetAll(c echo.Context) error {
 	logger.Info("UserHandler:GetAll")
 
 	// Parse query parameters and bind to request struct
-	req := new(domain.GetAllRequest)
+	req := new(domain.GetAllUsersRequest)
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrResponse(domain.ErrInvalidInput))
 	}
