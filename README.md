@@ -64,3 +64,8 @@ JWT를 사용하여 인증과 인가를 구현한다.
   - https://jusths.tistory.com/451
   - https://jusths.tistory.com/452
   - https://jusths.tistory.com/453
+
+### 8. 유효성 검사
+go-playground/validator를 사용하여 유효성 검사를 구현한다.
+- 브랜치: 8_validation
+- 블로그 포스팅: https://jusths.tistory.com/457
