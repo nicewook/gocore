@@ -380,3 +380,122 @@ func TestAuthHandler_CreateLogoutCookie(t *testing.T) {
 	assert.Equal(t, authConfig.Secure.JWT.Cookie.Secure, cookie.Secure)
 	assert.Equal(t, authConfig.Secure.JWT.Cookie.HTTPOnly, cookie.HttpOnly)
 }
+
+// TestSignUpRequestValidation 테스트는 SignUpRequest 구조체의 유효성 검사 태그를 확인합니다
+func TestSignUpRequestValidation(t *testing.T) {
+	tests := []struct {
+		name          string
+		requestBody   string
+		expectedCode  int
+		expectedError bool
+	}{
+		{
+			name:          "Valid Request",
+			requestBody:   `{"email":"test@example.com","password":"password123"}`,
+			expectedCode:  http.StatusCreated,
+			expectedError: false,
+		},
+		{
+			name:          "Empty Email",
+			requestBody:   `{"email":"","password":"password123"}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
+		{
+			name:          "Invalid Email Format",
+			requestBody:   `{"email":"invalid-email","password":"password123"}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
+		{
+			name:          "Empty Password",
+			requestBody:   `{"email":"test@example.com","password":""}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
+		{
+			name:          "Password Too Short",
+			requestBody:   `{"email":"test@example.com","password":"short"}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
+		{
+			name:          "Missing Email Field",
+			requestBody:   `{"password":"password123"}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
+		{
+			name:          "Missing Password Field",
+			requestBody:   `{"email":"test@example.com"}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
+		{
+			name:          "Malformed JSON",
+			requestBody:   `{"email":"test@example.com","password":}`,
+			expectedCode:  http.StatusBadRequest,
+			expectedError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup Echo
+			e := echo.New()
+			e.Validator = validatorutil.NewValidator()
+
+			// Setup request
+			req := httptest.NewRequest(http.MethodPost, "/auth/signup", strings.NewReader(tt.requestBody))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+
+			// Setup mock
+			mockUseCase := new(mocks.AuthUseCase)
+
+			// 유효한 요청인 경우에만 모킹
+			if !tt.expectedError {
+				mockUser := &domain.User{
+					Email:    "test@example.com",
+					Password: "password123",
+				}
+				mockCreatedUser := &domain.User{
+					ID:    1,
+					Email: "test@example.com",
+				}
+				mockUseCase.On("SignUpUser", mock.Anything, mock.MatchedBy(func(u *domain.User) bool {
+					return u.Email == mockUser.Email && u.Password == mockUser.Password
+				})).Return(mockCreatedUser, nil)
+			}
+
+			// Create handler
+			handler := NewAuthHandler(e, mockUseCase, authConfig)
+
+			// Call handler method
+			err := handler.SignUpUser(c)
+
+			// Assertions
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expectedCode, rec.Code)
+
+			// 실패 케이스에서는 에러 응답이 있는지 확인
+			if tt.expectedError {
+				var response map[string]interface{}
+				err := json.Unmarshal(rec.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Contains(t, response, "error")
+			} else {
+				// 성공 케이스에서는 모킹 함수 호출 확인
+				mockUseCase.AssertExpectations(t)
+
+				// 응답 내용 확인
+				var response domain.SignUpResponse
+				err := json.Unmarshal(rec.Body.Bytes(), &response)
+				assert.NoError(t, err)
+				assert.Equal(t, int64(1), response.ID)
+				assert.Equal(t, "test@example.com", response.Email)
+			}
+		})
+	}
+}
